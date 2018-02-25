@@ -14,4 +14,7 @@ public interface UserDao {
 	public int countUserTotal(SearchDataTable<User> searchDataTable);
 	public int countUserFilter(SearchDataTable<User> searchDataTable);
 	public void insertUser(User user);
+	public User loadUserById(String userId);
+	void deleteUserById(String userId);
+	int checkDuplicateUser(String userId);
 }

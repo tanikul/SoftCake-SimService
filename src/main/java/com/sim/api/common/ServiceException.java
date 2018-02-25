@@ -72,7 +72,7 @@ public class ServiceException  extends Exception implements Serializable {
 	private void setErrorMessageFromDB(){
 		if(this.getErrorCode() == 0000) return;
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT ERROR_CODE, ERROR_DESCRIPTION FROM ");
+		sql.append("SELECT ERROR_CODE, ERROR_MSG_EN, ERROR_MSG_TH FROM ");
 		sql.append(DBConstants.ERROR_MESSAGE);
 		sql.append(" WHERE ERROR_CODE = ?");
 		DataSourceBean dataSource = ApplicationContextHolder.getContext().getBean(DataSourceBean.class);

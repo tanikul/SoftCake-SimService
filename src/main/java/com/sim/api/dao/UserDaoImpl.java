@@ -56,7 +56,7 @@ public class UserDaoImpl implements UserDao {
 			sql.append("SELECT (SELECT COUNT(0) FROM BOOKING WHERE a.USER_ID = MERCHANT_ID) CNT_BOOKING, a.USER_ID, a.FIRST_NAME, a.LAST_NAME, a.ACTIVE_STATUS ");
 			sql.append(" FROM ");
 			sql.append(DBConstants.USER).append(" a ");	
-			
+			where.add(" a.ROLE NOT IN ('ADMIN')");
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getUserId())){
 				where.add(" a.USER_ID LIKE ?");
 			}
@@ -135,6 +135,7 @@ public class UserDaoImpl implements UserDao {
 			where.add(" CASE WHEN (? = '' || ? IS NULL) THEN 1=1 ELSE a.FIRST_NAME LIKE ? END");
 			where.add(" CASE WHEN (? = '' || ? IS NULL) THEN 1=1 ELSE a.LAST_NAME LIKE ? END");
 			where.add(" CASE WHEN (? = '' || ? IS NULL) THEN 1=1 ELSE a.ACTIVE_STATUS = ? END");
+			where.add(" ROLE NOT IN ('ADMIN')");
 			if(!where.isEmpty()){
 				sql.append(" WHERE ");
 				for(String strWhere : where){
@@ -169,8 +170,7 @@ public class UserDaoImpl implements UserDao {
 		int results = 0;
 		StringBuilder sql = new StringBuilder();
 		try {		
-			sql.append("SELECT COUNT(0) FROM ");
-			sql.append(DBConstants.USER);	
+			sql.append("SELECT COUNT(0) FROM ").append(DBConstants.USER).append(" WHERE ROLE NOT IN ('ADMIN')");
 			results = jdbcTemplate.queryForObject(sql.toString(), new Object[]{ 
 				}, Integer.class);
 		}catch (Exception e) {
@@ -275,5 +275,54 @@ public class UserDaoImpl implements UserDao {
     		logger.error(e);
     		throw e;
         }
+	}
+	
+	@Override
+	public User loadUserById(String userId) {
+		User result = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append(" SELECT a.*, b.DESCRIPTION PREFIX_NAME FROM ");
+			sql.append(DBConstants.USER).append(" a LEFT JOIN ").append(DBConstants.MASTER_SETUP);
+			sql.append(" b ON b.GROUP_TYPE = 'PREFIX' AND a.PREFIX = b.ID WHERE a.USER_ID = ?");
+			result = jdbcTemplate.queryForObject(sql.toString(),  new Object[] { userId }, new UserRowMapper());
+		} catch(EmptyResultDataAccessException e){
+			logger.debug(e);
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
+		return result;
+	}
+	
+	@Override
+	public void deleteUserById(String userId) {
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("DELETE FROM ").append(DBConstants.USER).append(" WHERE USER_ID = ?");
+			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+		        @Override
+		        public void setValues(PreparedStatement ps) throws SQLException {
+		        	ps.setString(1, userId);
+		        }
+		    });
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
+	}
+	
+	@Override
+	public int checkDuplicateUser(String userId) {
+		int results = 0;
+		StringBuilder sql = new StringBuilder();
+		try {		
+			sql.append("SELECT COUNT(0) FROM ").append(DBConstants.USER).append(" WHERE USER_ID = ?");
+			results = jdbcTemplate.queryForObject(sql.toString(), new Object[]{ userId }, Integer.class);
+		}catch (Exception e) {
+        	logger.error(e);
+        	throw e;
+        }	
+		return results;
 	}
 }

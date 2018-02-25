@@ -2,8 +2,11 @@ package com.sim.api.controller;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -11,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.soap.SOAPException;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,8 +27,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sim.api.common.ServiceException;
+import com.sim.api.model.ResultDataSim;
+import com.sim.api.model.Sim;
 import com.sim.api.model.User;
+import com.sim.api.service.EmailService;
 import com.sim.api.service.UserService;
 import com.sim.api.utils.AppUtils;
 import com.sim.api.utils.Constants;
@@ -44,8 +54,20 @@ public class LoginController {
 	@Autowired
 	private AppUtils app;
 	
+	@Autowired
+	EmailService emailService;
+	
 	 @RequestMapping(value = "/test",method = RequestMethod.GET)
 	 public String test() throws ServiceException {
+		 User u = new User();
+		 u.setActivateEmail("xxxxx");
+		 u.setEmail("tanikul.sa@gmail.com");
+		try {
+			emailService.sendEmailRegisterUser(u);
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		 return "^_^  Welcome to MasterSetup Service !!!!!!!!!!!!! \n";
 	 }
 	 
@@ -77,13 +99,11 @@ public class LoginController {
 			final HttpServletRequest request,
 			final HttpServletResponse response) throws ServiceException {
 		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-		    md.update(user.getUserId().getBytes());
-		    byte[] digest = md.digest();
-		    String myHash = DatatypeConverter
-		      .printHexBinary(digest).toUpperCase();
-		    user.setActivateEmail(myHash);
+			String sha256hex = DigestUtils.sha256Hex(user.getUserId() + user.getPassword() + new Date());
+			user.setPassword(DigestUtils.sha256Hex(user.getPassword()));
+		    user.setActivateEmail(sha256hex);
 		    user.setActiveStatus("N");
+		    user.setRole(Constants.USER_ROLE);
 			user.setCreatedBy(user.getUserId());
 			user.setLastUpdateBy(user.getUserId());
 			userService.insertUser(user);
@@ -93,6 +113,18 @@ public class LoginController {
         }
 		return Constants.SUCCESS;
 	}
+    
+    @RequestMapping(value = "/user/checkDuplicateUser",method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+	 @ResponseBody
+	 public int SearchSim(@RequestBody String userId) throws ServiceException {
+		int result = 0;
+		try {
+			result = userService.checkDuplicateUser(userId);
+		 }catch(Exception ex){
+			 logger.error(ex);
+		 }
+		 return result;
+    }
     
     @SuppressWarnings("unused")
     private static class LoginResponse {

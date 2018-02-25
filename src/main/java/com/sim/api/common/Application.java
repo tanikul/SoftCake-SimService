@@ -1,6 +1,9 @@
 package com.sim.api.common;
 
 import java.util.Locale;
+import java.util.Properties;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -15,12 +18,17 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication(scanBasePackages={"com.sim.api.common","com.sim.api.controller",
 		"com.sim.api.dao","com.sim.api.service"})
 public class Application extends SpringBootServletInitializer {
+	
+	@Autowired
+	AppProperties prop;
 	
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -32,7 +40,7 @@ public class Application extends SpringBootServletInitializer {
         return new DispatcherServlet();
     }
 
-    @Bean
+    @Bean("app")
     public AppUtils app() {
         return new AppUtils();
     }
@@ -66,6 +74,24 @@ public class Application extends SpringBootServletInitializer {
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
         return filter;
+    }
+    
+    @Bean("emailSender")
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(prop.getMailHost());
+        mailSender.setPort(prop.getMailPort());
+         
+        mailSender.setUsername(prop.getMailUsername());
+        mailSender.setPassword(prop.getMailPassword());
+        
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", prop.getMailProtocol());
+        props.put("mail.smtp.auth", prop.isMailAuth());
+        props.put("mail.smtp.starttls.enable", prop.isSmtpEnable());
+        props.put("mail.debug", prop.isMailDebug());
+         
+        return mailSender;
     }
 }
 
