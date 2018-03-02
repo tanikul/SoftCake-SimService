@@ -45,21 +45,15 @@ public class ProgramDaoImpl  implements ProgramDao{
 			sql.append("  select x.*  , ");
 			sql.append("  		'N' DEFVIEWER, "); 
 			sql.append("  		'N' DEFCHECKER, "); 
-			sql.append("  		'N' DEFMAKER");
+			sql.append("  		'N' DEFMAKER, x.PROGRAM_TYPE");
 			sql.append(" 	from  ").append(DBConstants.PROGRAM).append("  x  ");
 			sql.append("  	where x.ACTIVE_STATUS = 'Y' ");
-			if(dataTable.getDataSearch() != null && ( StringUtils.isNotBlank(dataTable.getDataSearch().getProgramType())) ){
-					sql.append(" and x.PROGRAM_TYPE = ?  ");
-			}
 			sql.append("  	order by x.group_level,x.PROGRAM_LEVEL ");
 
 			results = jdbcTemplate.query(sql.toString(),new PreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement preparedStatement) throws SQLException {
-					int i = 1;
-					if(dataTable.getDataSearch() != null && (StringUtils.isNotBlank(dataTable.getDataSearch().getProgramType())) ){
-							preparedStatement.setString(i++, dataTable.getDataSearch().getProgramType());
-					}
+					
 				} 
 			},new  ProgramRowMapper());
 		} catch (Exception e) {
@@ -75,18 +69,13 @@ public class ProgramDaoImpl  implements ProgramDao{
 	public int countSearchProgramByDataTableTotal(SearchDataTable<ProgramMst> dataTable) {
 		int  result = 0;
 		StringBuilder sql = new StringBuilder();
-		String roleGroup = "";
-
+		
 		try{
-			if(dataTable.getDataSearch() != null && (StringUtils.isNotBlank(dataTable.getDataSearch().getProgramType()) )){
-					roleGroup = dataTable.getDataSearch().getProgramType();
-			}
 			
 			sql.append(" select count(0)  from ").append(DBConstants.PROGRAM);
 			sql.append(" where ACTIVE_STATUS = 'Y' ");
-			sql.append("  and PROGRAM_TYPE =  ? ");
 
-			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { roleGroup }, Integer.class);
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] {}, Integer.class);
 		} catch (Exception e) {
 			LOGGER.error(e);
 			throw e;
@@ -101,7 +90,7 @@ public class ProgramDaoImpl  implements ProgramDao{
 	}
 
 	@Override
-	public List<ProgramMst> searchProgramMstDefaultPriviligeByRoleId(int roldId,String programType) {
+	public List<ProgramMst> searchProgramMstDefaultPriviligeByRoleId(int roldId) {
 		List<ProgramMst> results = null;
 		StringBuilder sql = new StringBuilder();
 
@@ -110,15 +99,15 @@ public class ProgramDaoImpl  implements ProgramDao{
 			sql.append("  	select x.*  ,  ");
 			sql.append("  		y.VIEWER DEFVIEWER, "); 
 			sql.append("  		y.CHECKER DEFCHECKER, "); 
-			sql.append("  		y.MAKER  DEFMAKER");
+			sql.append("  		y.MAKER  DEFMAKER, x.PROGRAM_TYPE");
 			sql.append("  		from  ").append(DBConstants.PROGRAM).append("  x  ");
-			sql.append("  	   LEFT JOIN PRIVILEGE_MST y   ");
+			sql.append("  	   LEFT JOIN ").append(DBConstants.PRIVILEGE).append(" y   ");
 			sql.append("  	 ON  x.PROGRAM_ID = y.PROGRAM_ID and y.ROLE_ID = ? ");
-			sql.append("  	where PROGRAM_TYPE =  ? ");
-			sql.append("  		and ACTIVE_STATUS = 'Y' ");
+			sql.append("  	where ");
+			sql.append("  	 ACTIVE_STATUS = 'Y' ");
 			sql.append("  	order by group_level,PROGRAM_LEVEL ");
 
-			results = jdbcTemplate.query(sql.toString(),new Object[] { roldId,programType } ,new  ProgramRowMapper());
+			results = jdbcTemplate.query(sql.toString(),new Object[] { roldId } ,new  ProgramRowMapper());
 		} catch (Exception e) {
 			LOGGER.error(e);
 			throw e;

@@ -41,7 +41,7 @@ public class ProgramServiceImpl  implements ProgramService{
 	public DataTable<ProgramMst> searchProgramDefaultPriviligeByRoldId(SearchDataTable<ProgramMst> dataTable , int roldId) {
 		DataTable<ProgramMst> result = new DataTable<>();
 		try {
-			List<ProgramMst> roleList = programDao.searchProgramMstDefaultPriviligeByRoleId(roldId,dataTable.getDataSearch().getProgramType());
+			List<ProgramMst> roleList = programDao.searchProgramMstDefaultPriviligeByRoleId(roldId);
 			int size = programDao.countSearchProgramByDataTableTotal(dataTable);
 			result.setData(roleList);
 			result.setDraw(dataTable.getDraw());

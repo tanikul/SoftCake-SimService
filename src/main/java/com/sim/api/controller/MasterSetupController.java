@@ -61,4 +61,16 @@ public class MasterSetupController {
 		}
 		return result;
 	}
+	
+	@RequestMapping(value = "loadRole", method = RequestMethod.GET)
+	public List<Map<String, Object>> loadRole() throws ServiceException  {
+		List<Map<String, Object>> result = null;
+		try {
+			result = masterSetupService.loadRole();
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ServiceException(e);
+		}
+		return result;
+	}
 }

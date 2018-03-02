@@ -37,7 +37,7 @@ public class RoleServiceImpl  implements RoleService{
 	public void saveRoleMst(RoleMst roleMst)  throws ServiceException {
 		String message = "";
 		try {
-			int duppCount = roleDao.checkDuplicateRoleNameByRoleType(roleMst.getRoleType() , roleMst.getRoleName());
+			int duppCount = roleDao.checkDuplicateRoleNameByRoleType(roleMst.getRoleName());
 			if(duppCount > 0 ){
 				message = errorMessageDao.getErrorMsgByCode("117").getErrorDescription();
 				throw new ServiceException(message);
@@ -69,24 +69,20 @@ public class RoleServiceImpl  implements RoleService{
 	}
 
 	@Override
-	public String validateAndDeleteRoleByRoleNameByRoleType(String roleType , String roleName) throws ServiceException {
+	public String validateAndDeleteRoleByRoleNameByRoleType(String roleName) throws ServiceException {
 		String message = null;
 		try{
 
-			if(roleDao.checkRoleExistingInUserMaster(roleType, roleName)  > 0 ){
+			if(roleDao.checkRoleExistingInUserMaster(roleName)  > 0 ){
 				message = errorMessageDao.getErrorMsgByCode("114").getErrorDescription();
 				LOGGER.info("checkRoleExistingInUserMaster === > " + message);
 				throw new ServiceException(message);
-			}else if (roleDao.checkRoleExistingInUserTmp(roleType, roleName) > 0 ){
-				message = errorMessageDao.getErrorMsgByCode("115").getErrorDescription();
-				LOGGER.info("checkRoleExistingInUserTmp === > " + message);
-				throw new ServiceException(message);
 			}else{
-				RoleMst roleMst = roleDao.getRoleMstByRoleNameByRoleType(roleName,roleType);
+				RoleMst roleMst = roleDao.getRoleMstByRoleNameByRoleType(roleName);
 				/******** Delete privilege **************/
 				privilegeDao.deletePrivilegeMstByRoleId(roleMst.getRoleId());
 				/******** Delete privilege **************/
-				roleDao.deletetRoleMstByRoleName(roleType,roleName);
+				roleDao.deletetRoleMstByRoleName(roleName);
 				
 				/**** #############################################*/
 				message = errorMessageDao.getErrorMsgByCode("116").getErrorDescription();
@@ -101,7 +97,7 @@ public class RoleServiceImpl  implements RoleService{
 	}
 
 	@Override
-	public RoleMst getRoleMstByRoleNameByRoleType(String roleName,String roleType) {
-			return  roleDao.getRoleMstByRoleNameByRoleType(roleName,roleType);
+	public RoleMst getRoleMstByRoleNameByRoleType(String roleName) {
+			return  roleDao.getRoleMstByRoleNameByRoleType(roleName);
 	}
 }

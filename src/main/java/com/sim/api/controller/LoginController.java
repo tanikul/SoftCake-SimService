@@ -26,10 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sim.api.common.ServiceException;
+import com.sim.api.model.ListPrivileges;
+import com.sim.api.model.PrivilegeJson;
 import com.sim.api.model.ResultDataSim;
 import com.sim.api.model.Sim;
 import com.sim.api.model.User;
@@ -76,6 +79,7 @@ public class LoginController {
 		 User u = null;
 		 try{
 			u = userService.checkLogin(user);
+			
 		 }catch(Exception ex){
 			 logger.error(ex);
 			 throw new ServiceException(ex);
@@ -125,6 +129,34 @@ public class LoginController {
 		 }
 		 return result;
     }
+    
+	 @RequestMapping(value = "/user/getRightUserDefault",method = RequestMethod.GET, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+	 @ResponseBody
+	 public ListPrivileges getRightUserDefault() throws ServiceException {
+    	ListPrivileges rs = new ListPrivileges();
+		try {
+			List<PrivilegeJson> result = userService.getRightUserDefault();
+			rs.setList(result);
+		}catch(Exception ex){
+			 logger.error(ex);
+		 }
+		 return rs;
+    }
+	 
+	 @RequestMapping(value = "/activateEmail",method = RequestMethod.GET)
+	 @ResponseBody
+	 public String activateEmail(@RequestParam("userId") String userId,
+			 @RequestParam("activateEmail") String activateEmail) throws ServiceException {
+		try {
+			User user = new User();
+			user.setActivateEmail(activateEmail);
+			user.setUserId(userId);
+			userService.updateConfirmation(user);
+		}catch(Exception ex){
+			 logger.error(ex);
+		}
+		return Constants.SUCCESS;
+   }
     
     @SuppressWarnings("unused")
     private static class LoginResponse {

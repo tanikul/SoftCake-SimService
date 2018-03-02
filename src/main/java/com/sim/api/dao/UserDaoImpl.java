@@ -25,6 +25,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.datatable.Order;
 import com.sim.api.mapper.UserRowMapper;
+import com.sim.api.model.PrivilegeJson;
+import com.sim.api.model.ProgramJson;
 import com.sim.api.model.User;
 import com.sim.api.utils.DBConstants;
 
@@ -56,7 +58,6 @@ public class UserDaoImpl implements UserDao {
 			sql.append("SELECT (SELECT COUNT(0) FROM BOOKING WHERE a.USER_ID = MERCHANT_ID) CNT_BOOKING, a.USER_ID, a.FIRST_NAME, a.LAST_NAME, a.ACTIVE_STATUS ");
 			sql.append(" FROM ");
 			sql.append(DBConstants.USER).append(" a ");	
-			where.add(" a.ROLE NOT IN ('ADMIN')");
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getUserId())){
 				where.add(" a.USER_ID LIKE ?");
 			}
@@ -68,6 +69,9 @@ public class UserDaoImpl implements UserDao {
 			}
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
 				where.add(" a.ACTIVE_STATUS = ?");
+			}
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRole())){
+				where.add(" a.ROLE =  ?");
 			}
 			if(!where.isEmpty()){
 				sql.append(" WHERE ");
@@ -101,6 +105,9 @@ public class UserDaoImpl implements UserDao {
 		    			}
 		                if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
 		    				preparedStatement.setString(i++, searchDataTable.getDataSearch().getActiveStatus());
+		    			}
+		                if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRole())){
+		    				preparedStatement.setString(i++, searchDataTable.getDataSearch().getRole());
 		    			}
 		            }
 		        }, new RowMapper<User>() {
@@ -324,5 +331,103 @@ public class UserDaoImpl implements UserDao {
         	throw e;
         }	
 		return results;
+	}
+	
+	@Override
+	public List<PrivilegeJson> getRightUserByRoleId(String roleId) {
+		List<PrivilegeJson> results = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT p.ROLE_ID, ");
+			sql.append("p.PROGRAM_ID, ");
+			sql.append("p.MAKER, ");
+			sql.append("p.CHECKER, ");
+			sql.append("p.VIEWER, ");
+			sql.append("pg.GROUP_LEVEL, ");
+			sql.append("pg.PROGRAM_GROUP, ");
+			sql.append("pg.PROGRAM_NAME, pg.PROGRAM_TYPE, pg.PROGRAM_LEVEL, ");
+			sql.append("pg.PROGRAM_REF, pg.ACTIVE_STATUS ");
+			sql.append(" FROM ").append(DBConstants.ROLE).append(" r ");
+			sql.append("INNER JOIN ").append(DBConstants.PRIVILEGE).append(" p ON p.ROLE_ID = r.ROLE_ID ");
+			sql.append("INNER JOIN ").append(DBConstants.PROGRAM).append(" pg ON pg.PROGRAM_ID = p.PROGRAM_ID AND pg.ACTIVE_STATUS = 'Y' ");
+			sql.append("WHERE r.ROLE_ID = ? ");
+			sql.append("AND r.ACTIVE_STATUS = 'Y' ORDER BY pg.GROUP_LEVEL, pg.PROGRAM_LEVEL ASC");
+			results = jdbcTemplate.query(sql.toString(),  new Object[]{ roleId }, new RowMapper<PrivilegeJson>() {
+				
+				@Override
+				public PrivilegeJson mapRow(ResultSet rs, int numRow) throws SQLException {
+					PrivilegeJson privilegeMst = new PrivilegeJson();
+					privilegeMst.setRoleId(rs.getInt("ROLE_ID"));
+					privilegeMst.setProgramId(rs.getInt("PROGRAM_ID"));
+					privilegeMst.setMaker(rs.getString("MAKER"));
+					privilegeMst.setChecker(rs.getString("CHECKER"));
+					privilegeMst.setViewer(rs.getString("VIEWER"));
+					privilegeMst.setProgramJson(new ProgramJson(rs.getInt("PROGRAM_ID"), rs.getString("PROGRAM_NAME"), rs.getString("PROGRAM_REF"), rs.getInt("PROGRAM_LEVEL"), rs.getString("PROGRAM_GROUP"), rs.getInt("GROUP_LEVEL"), rs.getString("PROGRAM_TYPE")));
+					return privilegeMst;
+				}
+		    });
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return results;
+	}
+	
+	@Override
+	public List<PrivilegeJson> getRightUserDefault() {
+		List<PrivilegeJson> results = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT p.ROLE_ID, ");
+			sql.append("p.PROGRAM_ID, ");
+			sql.append("p.MAKER, ");
+			sql.append("p.CHECKER, ");
+			sql.append("p.VIEWER, ");
+			sql.append("pg.GROUP_LEVEL, ");
+			sql.append("pg.PROGRAM_GROUP, ");
+			sql.append("pg.PROGRAM_NAME, pg.PROGRAM_TYPE, pg.PROGRAM_LEVEL, ");
+			sql.append("pg.PROGRAM_REF, pg.ACTIVE_STATUS ");
+			sql.append(" FROM ").append(DBConstants.ROLE).append(" r ");
+			sql.append("INNER JOIN ").append(DBConstants.PRIVILEGE).append(" p ON p.ROLE_ID = r.ROLE_ID ");
+			sql.append("INNER JOIN ").append(DBConstants.PROGRAM).append(" pg ON pg.PROGRAM_ID = p.PROGRAM_ID AND pg.ACTIVE_STATUS = 'Y' ");
+			sql.append("WHERE r.ROLE_NAME = 'USER_DEFAULT' ");
+			sql.append("AND r.ACTIVE_STATUS = 'Y' ORDER BY pg.GROUP_LEVEL, pg.PROGRAM_LEVEL ASC");
+			results = jdbcTemplate.query(sql.toString(),  new Object[]{ }, new RowMapper<PrivilegeJson>() {
+				
+				@Override
+				public PrivilegeJson mapRow(ResultSet rs, int numRow) throws SQLException {
+					PrivilegeJson privilegeMst = new PrivilegeJson();
+					privilegeMst.setRoleId(rs.getInt("ROLE_ID"));
+					privilegeMst.setProgramId(rs.getInt("PROGRAM_ID"));
+					privilegeMst.setMaker(rs.getString("MAKER"));
+					privilegeMst.setChecker(rs.getString("CHECKER"));
+					privilegeMst.setViewer(rs.getString("VIEWER"));
+					privilegeMst.setProgramJson(new ProgramJson(rs.getInt("PROGRAM_ID"), rs.getString("PROGRAM_NAME"), rs.getString("PROGRAM_REF"), rs.getInt("PROGRAM_LEVEL"), rs.getString("PROGRAM_GROUP"), rs.getInt("GROUP_LEVEL"), rs.getString("PROGRAM_TYPE")));
+					return privilegeMst;
+				}
+		    });
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return results;
+	}
+	
+	@Override
+	public void updateConfirmation(User user) {
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("UPDATE ").append(DBConstants.USER).append(" SET ACTIVE_STATUS = 'Y' WHERE ACTIVATE_EMAIL = ? AND USER_ID = ?");
+			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+		        @Override
+		        public void setValues(PreparedStatement ps) throws SQLException {
+		        	ps.setString(1, user.getActivateEmail());
+		        	ps.setString(2, user.getUserId());
+		        }
+		    });
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
 	}
 }

@@ -50,16 +50,15 @@ public class RoleDaoImpl  implements RoleDao{
 	    TransactionStatus status = transactionManager.getTransaction(def);
 		try{
 			sql.append("  INSERT INTO ").append(DBConstants.ROLE); 
-			sql.append("  (ROLE_NAME, ROLE_TYPE, ACTIVE_STATUS, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY)  "); 
-			sql.append("  VALUES ( ?, ? , ? , SYSDATE() , ? , SYSDATE(), ? )  ");
+			sql.append("  (ROLE_NAME, ACTIVE_STATUS, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY)  "); 
+			sql.append("  VALUES ( ?, ? , SYSDATE() , ? , SYSDATE(), ? )  ");
 			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
 				@Override
 				public void setValues(PreparedStatement ps) throws SQLException {
 					ps.setString(1, roleMst.getRoleName());
-					ps.setString(2, roleMst.getRoleType());
-					ps.setString(3, "Y");
-					ps.setString(4, roleMst.getCreatedBy()!=null?roleMst.getCreatedBy():"SYSTEM");
-					ps.setString(5, roleMst.getLastUpdatedBy()!=null?roleMst.getLastUpdatedBy():"SYSTEM");
+					ps.setString(2, "Y");
+					ps.setString(3, roleMst.getCreatedBy()!=null?roleMst.getCreatedBy():"SYSTEM");
+					ps.setString(4, roleMst.getLastUpdatedBy()!=null?roleMst.getLastUpdatedBy():"SYSTEM");
 				}
 			});
 	    	transactionManager.commit(status);
@@ -71,30 +70,28 @@ public class RoleDaoImpl  implements RoleDao{
 	}
 
 	@Override
-	public RoleMst getRoleMstByRoleNameByRoleType(String roleName,String roleType){
+	public RoleMst getRoleMstByRoleNameByRoleType(String roleName){
 		RoleMst result = null;
 		try {
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT * FROM ");
 			sql.append(DBConstants.ROLE);
 			sql.append(" WHERE ROLE_NAME = ? ");
-			sql.append(" and ROLE_TYPE =  ?  ");
-			result = jdbcTemplate.queryForObject(sql.toString(),  new Object[] { roleName ,roleType }, new RoleRowMapper());
+			result = jdbcTemplate.queryForObject(sql.toString(),  new Object[] { roleName }, new RoleRowMapper());
 		} catch(EmptyResultDataAccessException  ex){
 			LOGGER.error(">> getRoleMstByRoleNameByRoleType ERROR :"+ ex);
 		}
 		return result;	
 	}
 	@Override
-	public int checkDuplicateRoleNameByRoleType(String roleType, String roleName) {
+	public int checkDuplicateRoleNameByRoleType(String roleName) {
 		int result = 0;
 		StringBuilder sql = new StringBuilder();
 		try {
 			sql.append("SELECT COUNT(0) FROM  ");
 			sql.append(DBConstants.ROLE);
-			sql.append(" WHERE ROLE_TYPE = ?  ");
-			sql.append(" and ROLE_NAME = ? ");
-			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { roleType, roleName }, Integer.class);
+			sql.append(" WHERE ROLE_NAME = ?  ");
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { roleName }, Integer.class);
 		} catch (Exception e) {
 			LOGGER.error(e);
 			throw e;
@@ -140,9 +137,6 @@ public class RoleDaoImpl  implements RoleDao{
 				public void setValues(PreparedStatement preparedStatement) throws SQLException {
 					int i = 1;
 					if(roleData.getDataSearch() != null ){
-						if( StringUtils.isNotBlank(roleData.getDataSearch().getRoleType())){
-							preparedStatement.setString(i++, roleData.getDataSearch().getRoleType());
-						}
 						if( StringUtils.isNotBlank(roleData.getDataSearch().getRoleName())){
 							preparedStatement.setString(i++,  "%"+roleData.getDataSearch().getRoleName() + "%");
 						}
@@ -208,14 +202,10 @@ public class RoleDaoImpl  implements RoleDao{
 		String roleGroup = "";
 
 		try{
-			if(roleData.getDataSearch() != null && (StringUtils.isNotBlank(roleData.getDataSearch().getRoleType()))){
-					roleGroup = roleData.getDataSearch().getRoleType();
-			}
-			
 			sql.append(" select count(0)  from ").append(DBConstants.ROLE);
 			sql.append("  where ACTIVE_STATUS = 'Y' ");
 
-			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] {  roleGroup }, Integer.class);
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { }, Integer.class);
 		} catch (Exception e) {
 			LOGGER.error(e);
 			throw e;
@@ -225,7 +215,7 @@ public class RoleDaoImpl  implements RoleDao{
 	}
 
 	@Override
-	public void deletetRoleMstByRoleName(String roleType , String roleName){
+	public void deletetRoleMstByRoleName(String roleName){
 		TransactionDefinition def = new DefaultTransactionDefinition();
 		TransactionStatus status = transactionManager.getTransaction(def);
 		try{
@@ -234,7 +224,6 @@ public class RoleDaoImpl  implements RoleDao{
 			sql.append(" where ");
 			sql.append(" and ROLE_NAME = ? ");
 			jdbcTemplate.update(sql.toString(), new Object[] { roleName });
-
 			transactionManager.commit(status);
 		}catch (Exception e) {
 			transactionManager.rollback(status);
@@ -244,49 +233,23 @@ public class RoleDaoImpl  implements RoleDao{
 	}
 
 	@Override
-	public int checkRoleExistingInUserMaster(String userGroup,String roleName){
+	public int checkRoleExistingInUserMaster(String roleName){
 		int result = 0;
-		/*StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder();
 		try {
 			sql.append("select count(0)    ");
 			sql.append(" FROM  ").append(DBConstants.ROLE);
 			sql.append("  where exists(  ");
-			sql.append("	select USER_ROLE from  ").append(DBConstants.USER_MST).append("  where USER_GROUP = ROLE_TYPE  ");
-			sql.append("    and user_role = role_id   ");
+			sql.append("	select ROLE from  ").append(DBConstants.USER).append("  where ");
+			sql.append("    role = role_id   ");
 			sql.append(" )  ");
-			sql.append(" and ROLE_TYPE = ? ");
 			sql.append(" 	and ROLE_NAME = ? ");
-			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { userGroup, roleName }, Integer.class);
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { roleName }, Integer.class);
 		} catch (Exception e) {
 			LOGGER.error(e);
 			throw e;
-		}*/
+		}
 		return result;	
 	}
-
-	@Override
-	public int checkRoleExistingInUserTmp(String userGroup,String roleName){
-		int result = 0;
-		/*StringBuilder sql = new StringBuilder();
-		try {
-			sql.append("select count(0)    ");
-			sql.append("FROM  ").append(DBConstants.ROLE);
-			sql.append("  where exists (  ");
-			sql.append("	select USER_ROLE from  ").append(DBConstants.USER_TMP).append("  where USER_GROUP = ROLE_TYPE  ");
-			sql.append("    and user_role = role_id   ");
-			sql.append(" )  ");
-			sql.append(" and ROLE_TYPE = ? ");
-			sql.append(" 	and ROLE_NAME = ? ");
-			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { userGroup, roleName }, Integer.class);
-		} catch (Exception e) {
-			LOGGER.error(e);
-			throw e;
-		}*/
-		return result;	
-	}
-	
-	
-	
-
 
 }

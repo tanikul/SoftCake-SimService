@@ -9,7 +9,7 @@ public interface RoleService {
 	
 	public void saveRoleMst(RoleMst roleMst)  throws ServiceException ;
 	public DataTable<RoleMst> searchRoleByDataTable(SearchDataTable<RoleMst> roleData);
-	public String validateAndDeleteRoleByRoleNameByRoleType(String roleType , String roleName) throws ServiceException ;
-	public RoleMst getRoleMstByRoleNameByRoleType(String roleName,String roleType) ;
+	public String validateAndDeleteRoleByRoleNameByRoleType(String roleName) throws ServiceException ;
+	public RoleMst getRoleMstByRoleNameByRoleType(String roleName) ;
 
 }

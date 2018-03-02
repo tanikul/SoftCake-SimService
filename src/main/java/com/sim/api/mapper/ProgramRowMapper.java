@@ -42,7 +42,7 @@ public class ProgramRowMapper implements RowMapper<ProgramMst> {
 		program.setDefaultViewer(rs.getString("DEFVIEWER"));
 		program.setDefaultMaker(rs.getString("DEFMAKER"));
 		program.setDefaultChecker(rs.getString("DEFCHECKER"));
-
+		program.setProgramType(rs.getString("PROGRAM_TYPE"));
         program.setCreatedBy(rs.getString("CREATED_BY"));
         program.setCreatedDate(rs.getDate("CREATED_DATE"));
         program.setLastUpdateBy(rs.getString("LAST_UPDATED_BY"));

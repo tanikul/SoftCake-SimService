@@ -50,8 +50,8 @@ public class EmailServiceImpl implements EmailService {
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);	 
 		helper.setFrom(new InternetAddress("noreply@xxx.com"));
 	    helper.setTo(user.getEmail());
-	    helper.setSubject("Â×¹ÂÑ¹µÑÇµ¹");
-	    helper.setText("<a href=\"" + app.getWebUrl() + "/activateEmail?" + user.getActivateEmail() + "\">" + app.getWebUrl() + "/activateEmail?" + user.getActivateEmail() + "</a>", true);
+	    helper.setSubject("ï¿½×¹ï¿½Ñ¹ï¿½ï¿½Çµï¿½");
+	    helper.setText("<a href=\"" + app.getWebUrl() + "/activateEmail?userId=" + user.getUserId() + "&activateEmail=" + user.getActivateEmail() + "\">" + app.getWebUrl() + "/activateEmail?userId=" + user.getUserId() + "&activateEmail=" + user.getActivateEmail() + "</a>", true);
 	    emailSender.send(message);
 	}
 

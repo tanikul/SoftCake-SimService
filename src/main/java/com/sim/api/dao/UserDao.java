@@ -3,6 +3,7 @@ package com.sim.api.dao;
 import java.util.List;
 
 import com.sim.api.datatable.SearchDataTable;
+import com.sim.api.model.PrivilegeJson;
 import com.sim.api.model.User;
 
 public interface UserDao {
@@ -17,4 +18,7 @@ public interface UserDao {
 	public User loadUserById(String userId);
 	void deleteUserById(String userId);
 	int checkDuplicateUser(String userId);
+	List<PrivilegeJson> getRightUserByRoleId(String roleId);
+	List<PrivilegeJson> getRightUserDefault();
+	void updateConfirmation(User user);
 }

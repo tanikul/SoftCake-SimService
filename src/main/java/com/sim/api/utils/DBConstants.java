@@ -11,7 +11,7 @@ public class DBConstants {
 	public static final String PRIVILEGE = "PRIVILEGE";
 	public static final String PROGRAM = "PROGRAM";
 	public static final String ROLE = "ROLE";
-	
+	public static final String PREDICT = "PREDICT";
 	
 	private DBConstants() {
 	}

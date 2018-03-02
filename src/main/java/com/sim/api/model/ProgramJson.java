@@ -11,16 +11,18 @@ public class ProgramJson implements Serializable {
 	private int programLevel;
 	private String programGroup;
 	private int groupLevel;
+	private String programType;
 	
 	public ProgramJson(){}
 	
-	public ProgramJson(int programId, String programName, String programRef, int programLevel, String programGroup, int groupLevel){
+	public ProgramJson(int programId, String programName, String programRef, int programLevel, String programGroup, int groupLevel, String programType){
 		this.setProgramId(programId);
 		this.setProgramName(programName);
 		this.setProgramRef(programRef);
 		this.setProgramLevel(programLevel);
 		this.setProgramGroup(programGroup);
 		this.setGroupLevel(groupLevel);
+		this.setProgramType(programType);
 	}
 	
 	public int getProgramId() {
@@ -59,4 +61,13 @@ public class ProgramJson implements Serializable {
 	public void setGroupLevel(int groupLevel) {
 		this.groupLevel = groupLevel;
 	}
+
+	public String getProgramType() {
+		return programType;
+	}
+
+	public void setProgramType(String programType) {
+		this.programType = programType;
+	}
+	
 }

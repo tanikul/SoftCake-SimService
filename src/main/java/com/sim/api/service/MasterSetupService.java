@@ -7,4 +7,5 @@ public interface MasterSetupService {
 
 	public List<Map<String, Object>> loadProvince();
 	public List<Map<String, Object>> loadMasterSetup(String prefix);
+	List<Map<String, Object>> loadRole();
 }

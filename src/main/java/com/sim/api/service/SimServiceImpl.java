@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.sim.api.dao.SimDao;
 import com.sim.api.dao.SimDaoImpl;
+import com.sim.api.datatable.DataTable;
+import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.ResultDataSim;
 import com.sim.api.model.Sim;
 
@@ -32,4 +34,28 @@ public class SimServiceImpl implements SimService {
 		return result;
 	}
 
+	@Override
+	public void insertSim(Sim sim) {
+		try {
+			simDao.insertSim(sim);
+		} catch(Exception ex){
+			throw ex;
+		}
+	}
+
+	@Override
+	public DataTable<Sim> SearchSimDataTable(SearchDataTable<Sim> searchDataTable) {
+		DataTable<Sim> result = new DataTable<>();
+		try {
+			List<Sim> corps = simDao.SearchSimDataTable(searchDataTable);
+			result.setData(corps);
+			result.setDraw(searchDataTable.getDraw());
+			result.setRecordsTotal(simDao.countSimTotalDataTable(searchDataTable));
+			result.setRecordsFiltered(simDao.CountSimDataTableFilter(searchDataTable));
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
+		return result;
+	}
 }

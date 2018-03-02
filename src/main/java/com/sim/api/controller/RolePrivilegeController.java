@@ -56,7 +56,6 @@ public class RolePrivilegeController {
 	private static final String CLAIMSTR = "claims";
 	private static final String PRODUCES = "application/json;charset=UTF-8";
 	private static final String HEADERS = "Accept=text/xml, application/json";
-	private static final String ROLEGROUP_BANK = "BANK";
 	private static final String ROLEGROUP_CORP = "CORP";
 
     private String saveRoleAndPrivilegeValidate(String str, HttpServletRequest request, HttpServletResponse response) throws ServiceException{
@@ -95,23 +94,21 @@ public class RolePrivilegeController {
 			roleMst.setCreatedBy(claims.getSubject());
 			roleMst.setLastUpdateBy(claims.getSubject());
 			roleService.saveRoleMst(roleMst);
-			RoleMst roleMstAfter = roleService.getRoleMstByRoleNameByRoleType(roleMst.getRoleName(),roleMst.getRoleType());
+			RoleMst roleMstAfter = roleService.getRoleMstByRoleNameByRoleType(roleMst.getRoleName());
 
 
 			/** ===========================  save role ========================*/
 			/** step 2. save privilege  */
-			String oldPriv = "";
 			
 			privilegeService.savePrivilegeMst(programs , roleMstAfter , claims.getSubject());
 			
 			/** Audit record */
 			privilegeList = privilegeService.getPrivilegeMstListByRoleId(roleMstAfter.getRoleId());
 		}else if("EDIT".equals(mode)){
-			RoleMst roleMstAfter = roleService.getRoleMstByRoleNameByRoleType(roleMst.getRoleName(),roleMst.getRoleType());
+			RoleMst roleMstAfter = roleService.getRoleMstByRoleNameByRoleType(roleMst.getRoleName());
 
 			privilegeList = privilegeService.getPrivilegeMstListByRoleId(roleMstAfter.getRoleId());
-			String oldPriv = this.convertPrivilegeListToJson(privilegeList);
-
+			
 			privilegeService.editPrivilegeMst(programs , roleMstAfter , claims.getSubject());
 
 			privilegeList = privilegeService.getPrivilegeMstListByRoleId(roleMstAfter.getRoleId());
@@ -237,10 +234,10 @@ public class RolePrivilegeController {
 	
 	private void deleteRoleByRoleName(String roleGroup , String roleName,Claims claims) throws ServiceException{
 		String roleType = "";
-		RoleMst roleMst = roleService.getRoleMstByRoleNameByRoleType(roleName,roleType);
+		RoleMst roleMst = roleService.getRoleMstByRoleNameByRoleType(roleName);
 		roleMst.setLastUpdateBy(claims.getSubject());
 
-		roleService.validateAndDeleteRoleByRoleNameByRoleType(roleType,roleName);
+		roleService.validateAndDeleteRoleByRoleNameByRoleType(roleName);
 
 	}
 	

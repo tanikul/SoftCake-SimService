@@ -59,4 +59,23 @@ public class MasterSetupDaoImpl implements MasterSetupDao {
 		}
 		return result;
 	}
+	
+	@Override
+	public List<Map<String, Object>> loadRole() {
+		List<Map<String, Object>> result = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT ROLE_ID CODE, ROLE_NAME DESCRIPTION FROM ");
+			sql.append(DBConstants.ROLE);
+			sql.append(" WHERE ROLE_NAME NOT IN ('USER_DEFAULT')");
+			sql.append(" ORDER BY ROLE_NAME ASC");
+			result = jdbcTemplate.queryForList(sql.toString(), new Object[] { });
+		} catch(EmptyResultDataAccessException e){
+			logger.debug(e);
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
 }

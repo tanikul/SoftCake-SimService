@@ -42,4 +42,16 @@ public class MasterSetupServiceImpl implements MasterSetupService {
 		}
 		return result;
 	}
+
+	@Override
+	public List<Map<String, Object>> loadRole() {
+		List<Map<String, Object>> result = null;
+		try {
+			result = masterSetupDao.loadRole();
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
 }

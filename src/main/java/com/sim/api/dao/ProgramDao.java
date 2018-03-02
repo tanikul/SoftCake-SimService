@@ -10,5 +10,5 @@ public interface ProgramDao {
 	public List<ProgramMst> searchProgramMstByDataTable(SearchDataTable<ProgramMst> dataTable);
 	public int countSearchProgramByDataTableTotal(SearchDataTable<ProgramMst> dataTable) ;
 	public int countSearchProgramByDataTableFilter(SearchDataTable<ProgramMst> dataTable) ;
-	public List<ProgramMst> searchProgramMstDefaultPriviligeByRoleId(int roldId,String programType);
+	public List<ProgramMst> searchProgramMstDefaultPriviligeByRoleId(int roldId);
 }

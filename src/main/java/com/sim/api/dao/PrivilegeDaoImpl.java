@@ -193,7 +193,7 @@ public class PrivilegeDaoImpl implements PrivilegeDao {
 		try {
 			StringBuilder sql = new StringBuilder();
 			sql.append("	select ROLE_ID , PROGRAM_ID , MAKER , CHECKER , VIEWER  ");
-			sql.append("	from PRIVILEGE_MST ");
+			sql.append("	from ").append(DBConstants.PRIVILEGE);
 			sql.append("			where ROLE_ID = ? ");
 			results = jdbcTemplate.query(sql.toString(),new PreparedStatementSetter() {
 				@Override

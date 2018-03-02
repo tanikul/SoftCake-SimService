@@ -1,7 +1,10 @@
 package com.sim.api.service;
 
+import java.util.List;
+
 import com.sim.api.datatable.DataTable;
 import com.sim.api.datatable.SearchDataTable;
+import com.sim.api.model.PrivilegeJson;
 import com.sim.api.model.User;
 
 public interface UserService {
@@ -13,4 +16,6 @@ public interface UserService {
 	public User loadUserById(String userId);
 	void deleteUserById(String userId);
 	int checkDuplicateUser(String userId);
+	List<PrivilegeJson> getRightUserDefault();
+	void updateConfirmation(User user);
 }

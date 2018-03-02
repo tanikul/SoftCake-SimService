@@ -2,6 +2,8 @@ package com.sim.api.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 
 public class User extends BaseDomain implements Serializable {
 
@@ -24,6 +26,8 @@ public class User extends BaseDomain implements Serializable {
 	private String mobile;
 	private String email;
 	private String activateEmail;
+	private RoleJson roleJson;
+    private List<PrivilegeJson> privilegeJsons;
 	
 	public String getUserId() {
 		return userId;
@@ -126,6 +130,18 @@ public class User extends BaseDomain implements Serializable {
 	}
 	public void setActivateEmail(String activateEmail) {
 		this.activateEmail = activateEmail;
+	}
+	public RoleJson getRoleJson() {
+		return roleJson;
+	}
+	public void setRoleJson(RoleJson roleJson) {
+		this.roleJson = roleJson;
+	}
+	public List<PrivilegeJson> getPrivilegeJsons() {
+		return privilegeJsons;
+	}
+	public void setPrivilegeJsons(List<PrivilegeJson> privilegeJsons) {
+		this.privilegeJsons = privilegeJsons;
 	}
 	
 }
