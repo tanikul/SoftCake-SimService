@@ -18,4 +18,13 @@ public interface UserService {
 	int checkDuplicateUser(String userId);
 	List<PrivilegeJson> getRightUserDefault();
 	void updateConfirmation(User user);
+	void registerUser(User user) throws Exception;
+	void updateUser(User user);
+	int updatePassword(String userId, String oldPassword, String newPassword);
+	void updateUserAdmin(User user);
+	String updateForgotPassword(String email) throws Exception;
+	User selectUserByEmail(String email);
+	User selectUserByEmailAndForgotPassword(User user);
+	void updatePasswordForgotPassword(User user) throws Exception;
+	void editUserCustomer(User user);
 }

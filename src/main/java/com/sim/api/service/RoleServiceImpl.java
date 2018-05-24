@@ -1,6 +1,5 @@
 package com.sim.api.service;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;

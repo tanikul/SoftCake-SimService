@@ -21,4 +21,12 @@ public interface UserDao {
 	List<PrivilegeJson> getRightUserByRoleId(String roleId);
 	List<PrivilegeJson> getRightUserDefault();
 	void updateConfirmation(User user);
+	void updateUser(User user);
+	int updatePassword(String userId, String oldPassword, String newPassword);
+	void updateUserAdmin(User user);
+	int updateForgotPassword(String email);
+	User selectUserByEmail(String email);
+	User selectUserByEmailAndForgotPassword(User user);
+	void updatePasswordForgotPassword(User user);
+	void editUserCustomer(User user);
 }

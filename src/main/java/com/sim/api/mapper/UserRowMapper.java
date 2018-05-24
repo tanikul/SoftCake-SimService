@@ -24,6 +24,16 @@ public class UserRowMapper implements RowMapper<User>  {
 		user.setLastUpdateBy(rs.getString("LAST_UPDATED_BY"));
 		user.setLastUpdateDate(rs.getTimestamp("LAST_UPDATED_DATE"));
 		user.setRole(rs.getString("ROLE"));
+		user.setAddress(rs.getString("ADDRESS"));
+		user.setPostcode(rs.getString("POSTCODE"));
+		user.setProvince(rs.getInt("PROVINCE"));
+		user.setProvinceStr(rs.getString("PROVINCE_NAME"));
+		user.setMobile(rs.getString("MOBILE"));
+		user.setEmail(rs.getString("EMAIL"));
+		user.setLine(rs.getString("LINE"));
+		user.setNickName(rs.getString("NICKNAME"));
+		user.setWebsite(rs.getString("WEBSITE"));
+		user.setUserType(rs.getString("USER_TYPE"));
 		return user;
 	}
 

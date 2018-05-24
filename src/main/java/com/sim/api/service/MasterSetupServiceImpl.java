@@ -54,4 +54,21 @@ public class MasterSetupServiceImpl implements MasterSetupService {
 		}
 		return result;
 	}
+
+	@Override
+	public Map<String, Object> getProvinceById(String id) {
+		return masterSetupDao.getProvinceById(id);
+	}
+
+	@Override
+	public Map<String, Object> loadMasterSetupByPrefixAndId(String prefix, String id) {
+		Map<String, Object> result = null;
+		try {
+			result = masterSetupDao.loadMasterSetupByPrefixAndId(prefix, id);
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
 }

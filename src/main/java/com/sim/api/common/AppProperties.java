@@ -52,6 +52,9 @@ public class AppProperties {
 	
 	@Value("${softcake.web.url}")
 	private String webUrl;
+
+	@Value("${softcake.mail.sender}")
+	private String sender;
 	
 	public String getJndiName() {
 		return jndiName;
@@ -172,6 +175,13 @@ public class AppProperties {
 	public void setWebUrl(String webUrl) {
 		this.webUrl = webUrl;
 	}
-		
+
+	public String getSender() {
+		return sender;
+	}
+
+	public void setSender(String sender) {
+		this.sender = sender;
+	}
 	
 }

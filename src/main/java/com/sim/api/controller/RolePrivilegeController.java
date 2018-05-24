@@ -233,7 +233,6 @@ public class RolePrivilegeController {
 	}
 	
 	private void deleteRoleByRoleName(String roleGroup , String roleName,Claims claims) throws ServiceException{
-		String roleType = "";
 		RoleMst roleMst = roleService.getRoleMstByRoleNameByRoleType(roleName);
 		roleMst.setLastUpdateBy(claims.getSubject());
 

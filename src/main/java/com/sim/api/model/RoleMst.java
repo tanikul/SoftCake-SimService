@@ -2,19 +2,6 @@ package com.sim.api.model;
 
 public class RoleMst extends BaseDomain {
 	
-	
-	/**
-	 * 
-  ROLE_ID INTEGER IDENTITY PRIMARY KEY,
-  ROLE_NAME varchar(255) NOT NULL,
-  ROLE_TYPE varchar(4) NOT NULL,
-  ACTIVE_STATUS char(1) NOT NULL,
-  CREATED_DATE datetime NOT NULL,
-  CREATED_BY varchar(120) NOT NULL,
-  LAST_UPDATED_DATE datetime NOT NULL,
-  LAST_UPDATED_BY varchar(120) NOT NULL
-	 */
-	private static final long serialVersionUID = -775702700619348041L;
 	private int roleId;
 	private String roleName;
 	private String roleType;

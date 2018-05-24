@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
@@ -18,10 +20,12 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -396,4 +400,35 @@ public class AppUtils {
 		}
 		return true;
 	}	
+	
+	public int calculateSim(String simNumber){
+		int result = 0;
+		String[] ary = simNumber.replaceAll("-", "").split("");
+		for(int i = 0; i < ary.length; i++){
+			result += Integer.parseInt(ary[i]);
+		}
+		return result;
+	}
+	
+	public String BigDecimalToCurrencyFormat(BigDecimal val) {
+		 NumberFormat n2 = NumberFormat.getInstance(Locale.US); 
+		 double dShares = val.setScale(2, RoundingMode.FLOOR).doubleValue();
+		 String sShares = n2.format(dShares);
+		 return sShares; 
+	}
+	
+	public String parseSimFormat(String simNumber){
+		if(StringUtils.isEmpty(simNumber)) {
+			return "";
+		}
+		simNumber = simNumber.replaceAll("-", "");
+		if("-".equals(simNumber.substring(3, 4)) && "-".equals(simNumber.substring(6, 7)) && "-".equals(simNumber.substring(10, 11))) {
+			return simNumber;
+		}
+		return simNumber.substring(0, 3) + "-" + simNumber.substring(3, 6) + "-" + simNumber.substring(6, 10);
+	}
+	
+	public String removeSimFormat(String simNumber){
+		return simNumber.replaceAll("-", "");
+	}
 }

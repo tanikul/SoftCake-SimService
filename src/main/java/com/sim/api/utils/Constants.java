@@ -12,7 +12,10 @@ public class Constants {
 	public static final Key SECRET = MacProvider.generateKey(SignatureAlgorithm.HS256);
 	private static final byte[] SECRETBYTES = SECRET.getEncoded();
 	public static final String BASE64SECRETBYTES = Base64.getEncoder().encodeToString(getSecretBytes());
-	public static final String USER_ROLE = "331";
+	public static final String MST = "MST";
+	public static final String TMP = "TMP";
+	public static final String USER_TYPE_ADMIN = "ADMIN";
+	public static final String USER_TYPE_CUSTOMER = "CUSTOMER";
 	
 	private Constants() {
 	}

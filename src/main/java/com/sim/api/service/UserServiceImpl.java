@@ -93,6 +93,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void registerUser(User user) throws Exception {
+		try {
+			userDao.insertUser(user);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+	}
+	
+	@Override
 	public User loadUserById(String userId) {
 		User result = null;
 		try {
@@ -146,6 +156,80 @@ public class UserServiceImpl implements UserService {
 			logger.error(ex);
 			throw ex;
 		}
+	}
+
+	@Override
+	public void updateUser(User user) {
+		try {
+			userDao.updateUser(user);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+	}
+
+	@Override
+	public int updatePassword(String userId, String oldPassword, String newPassword) {
+		int result = 0;
+		try {
+			result = userDao.updatePassword(userId, oldPassword, newPassword);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
+
+	@Override
+	public void updateUserAdmin(User user) {
+		try {
+			userDao.updateUserAdmin(user);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+	}
+
+	@Override
+	public String updateForgotPassword(String email) throws Exception {
+		String result = "0";
+		try {
+			if(userDao.updateForgotPassword(email) == 1) {
+				User user = userDao.selectUserByEmail(email);
+				emailService.sendEmailForgotPassword(user);
+				result = "1";
+			}
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
+	
+	
+	@Override
+	public void updatePasswordForgotPassword(User user) throws Exception {
+		try {
+			userDao.updatePasswordForgotPassword(user);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+	}
+	
+	@Override
+	public User selectUserByEmail(String email) {
+		return userDao.selectUserByEmail(email);
+	}
+
+	@Override
+	public User selectUserByEmailAndForgotPassword(User user) {
+		return userDao.selectUserByEmailAndForgotPassword(user);
+	}
+	
+	@Override
+	public void editUserCustomer(User user) {
+		userDao.editUserCustomer(user);
 	}
 
 }

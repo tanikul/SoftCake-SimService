@@ -47,7 +47,8 @@ public class ProgramRowMapper implements RowMapper<ProgramMst> {
         program.setCreatedDate(rs.getDate("CREATED_DATE"));
         program.setLastUpdateBy(rs.getString("LAST_UPDATED_BY"));
         program.setLastUpdateDate(rs.getDate("LAST_UPDATED_DATE"));
-
+        program.setExceptRole(rs.getString("EXCEPT_ROLE"));
+        program.setDisableFlag(rs.getString("DISABLE_FLAG"));
         return program; 
 	}
 

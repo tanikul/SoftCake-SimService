@@ -111,7 +111,7 @@ public class RoleDaoImpl  implements RoleDao{
 			sql.append(" ( CASE WHEN U.ROLE is null  THEN FALSE ELSE TRUE END)  DEL_FLG  ");
 			sql.append(" from ").append(DBConstants.ROLE).append("  R  ");
 			sql.append(" LEFT JOIN (   ");
-			sql.append("    select ROLE from ").append(DBConstants.USER).append("  ");
+			sql.append("    select DISTINCT ROLE from ").append(DBConstants.USER).append("  ");
 			sql.append(" ) U ON U.ROLE = R.ROLE_ID  ");
 			sql.append(" where ACTIVE_STATUS = 'Y' ");
 
@@ -199,8 +199,6 @@ public class RoleDaoImpl  implements RoleDao{
 	public int countSearchRoleByDataTableTotal(SearchDataTable<RoleMst> roleData) {
 		int  result = 0;
 		StringBuilder sql = new StringBuilder();
-		String roleGroup = "";
-
 		try{
 			sql.append(" select count(0)  from ").append(DBConstants.ROLE);
 			sql.append("  where ACTIVE_STATUS = 'Y' ");

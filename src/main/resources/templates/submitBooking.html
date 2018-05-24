@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Sending Email with Thymeleaf HTML Template Example</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 48px;
+        }
+        .row {
+		    margin-right: -15px;
+		    margin-left: -15px;
+		}
+		@media (min-width: 992px)
+		.col-md-12 {
+		    width: 100%;
+		}
+		@media (min-width: 992px)
+		.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+		    float: left;
+		}
+		@media (min-width: 768px)
+		.col-sm-12 {
+		    width: 100%;
+		}
+		@media (min-width: 768px)
+		.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+		    float: left;
+		}
+		.col-xs-12 {
+		    width: 100%;
+		}
+		.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
+		    float: left;
+		}
+		.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+		    position: relative;
+		    min-height: 1px;
+		    padding-right: 15px;
+		    padding-left: 15px;
+		}
+		@media (min-width: 992px)
+		.col-md-8 {
+		    width: 66.66666667%;
+		}
+		.panel-success {
+		    border-color: #d6e9c6;
+		}
+		.panel {
+		    margin-bottom: 20px;
+		    background-color: #fff;
+		    border: 1px solid transparent;
+		    border-radius: 4px;
+		    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+		    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+		}
+		.panel-success > .panel-heading {
+		    color: #3c763d;
+		    background-color: #dff0d8;
+		    border-color: #d6e9c6;
+		}
+		.panel-heading {
+		    font-size: 22px;
+		    font-family: rsu_bold;
+		}
+		.panel-heading {
+		    padding: 10px 15px;
+		    border-bottom: 1px solid transparent;
+		    border-top-left-radius: 3px;
+		    border-top-right-radius: 3px;
+		}
+		.panel-title {
+		    font-size: 22px;
+		    font-family: rsu_bold;
+		}
+		.panel-title {
+		    margin-top: 0;
+		    margin-bottom: 0;
+		    font-size: 16px;
+		    color: inherit;
+		}
+		.panel-body {
+		    padding: 15px;
+		}
+    </style>
+</head>
+<body>
+<div class="row">
+		<div class="col-md-12 col-sm-12 col-xs-12">
+             	<div class="panel panel-success">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">รายละเอียดการจอง Booking No. </h3>
+		      </div>
+		      <div class="panel-body">
+		      	<div class="row">
+		      		<div class="col-md-8"></div>
+		      		<div class="col-md-4">
+		      			<div class="panel panel-success">
+					      <div class="panel-body">
+					      	<b>ข้อมูลส่วนตัว</b><br/>
+					       	 <!-- <b>ชื่อ-นามสกุล :</b> ${user.prefixName} ${user.firstName} ${user.lastName}<br/>
+					         <b>ชื่อหมอดู / ฉายาหมอดู :</b> ${user.nickName}<br/> 
+					         <b>ที่อยู่ :</b> ${user.address} ${user.provinceStr}  ${user.postcode}<br/>               
+					         <b>เบอร์โทรศัพท์ : </b> ${user.mobile}<br/>
+					         <b>อีเมล์: </b> ${user.email}<br/>
+					         <b>Line ID : </b> ${user.mobile}<br/>
+					         <b>Website :</b> ${user.website}<br/> -->
+					      </div>
+					    </div>
+		      		</div>
+		      	</div>
+		        <div class="row">
+		        	<div class="col-md-1"></div>
+					<div class="col-md-9">
+						<table id="user_table" class="table table-bordered" style="width:100%;margin-top:20px;">
+			                 <thead>
+			                      <tr>
+			                      	  <th class="text-center" width="10%"><b>No.</b></th>
+			                          <th class="text-center" width="20%"><b>เบอร์โทรศัพท์</b></th>
+			                          <th class="text-center" width="10%"><b>Credit Term (วัน)</b></th>
+			                          <th class="text-center" width="10%"><b>ราคา (บาท)</b></th>
+			                      </tr>
+			                  </thead>
+			                  <tbody>
+			                   <!--  <c:set var="sumTotal" value="0" scope="page" />
+			                  	<c:forEach var="item" items="${data.bookingDetails}" varStatus="counter">
+			                  		<tr>
+			                  			<td style="text-align:center;">${counter.count}</td>
+			                  			<td style="text-align:center;">${app.parseSimFormat(item.simNumber)}</td>
+			                  			<td style="text-align:center;">${item.creditTerm}</td>
+			                  			<td style="text-align:right;"><fmt:formatNumber type="currency" currencySymbol="" value="${item.price}"/></td>
+			                  		</tr>
+			                  	</c:forEach>
+			                  	<tr>
+			                  		<td colspan="3" style="text-align:right;">รวม</td>
+			                  		<td style="text-align:right;"><fmt:formatNumber type="currency" currencySymbol="" value="${data.sumPrice}"/></td>
+			                  	</tr> -->
+			                  </tbody>
+			              </table>
+					</div>
+					<div class="col-md-2"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-1"></div>
+						<div class="col-md-9">
+							<div class="panel panel-default">
+						  		<div class="panel-heading"><i class="fas fa-home" style="font-size:1.2em;"></i>&nbsp;&nbsp;ที่อยู่ในการจัดส่ง/ใบกำกับภาษี</div>
+						  		<div class="panel-body">
+						    	<div class="row">
+						    		<div class="col-md-5">
+					    				<div class="radio" id="show_data2">
+					    					<label>
+												<input type="checkbox" name="add-chk" value="1" />
+											</label>&nbsp;&nbsp;ใช้ที่อยู่เดียวกับที่สมัครไว้ 
+										</div>	
+						    		</div>
+						  		</div>
+						  		<!-- <div class="container-fluid form-horizontal">
+						  			<div class="row">
+					    				<div class="form-group">
+								  			<label class="col-sm-2 control-label">ที่อยู่</label>
+											<div class="col-sm-4">
+												<input type="text" id="address" class="form-control" value="${data.address}" disabled/>
+												<div class="help-block with-errors"></div>
+											</div>
+										
+											<label class="col-sm-2 control-label">จังหวัด</label>
+											<div class="col-sm-4">
+												<select id="province" class="form-control"></select>
+												<div class="help-block with-errors"></div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">รหัสไปรษณีย์</label>
+											<div class="col-sm-4">
+												<input type="text" id="postcode" class="form-control" value="${data.postcode}" disabled/>
+												<div class="help-block with-errors"></div>
+											</div>
+										</div>
+									</div>
+								</div> -->
+							</div>
+					 	</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-1"></div>
+						<div class="col-md-9">
+						<div class="panel panel-default">
+						  <div class="panel-heading"><i class="far fa-credit-card" style="font-size:1.2em;"></i>&nbsp;&nbsp;ช่องทางการชำระเงิน</div>
+						  <div class="panel-body">
+						    <div class="row">
+						    	<div class="col-md-5">
+				    				<div class="radio" id="show_data">
+										<label>
+											<input type="radio" name="payType" value="1" checked="checked" disabled="disabled" />
+										</label>&nbsp;&nbsp;โอนเงินผ่านธนาคาร 
+									</div>
+									
+									<div class="help-block with-errors" style="margin-left:10px;"></div>
+						    	</div>
+						    </div>
+						    <div class="row">
+						    	<div class="col-md-5">
+						    		<div class="form-group">
+						    		<div id="bookbank" style="margin:10px;"></div>
+						    		</div>
+						    	</div>
+						    </div>
+						  </div>
+						</div>
+					</div>
+					<div class="col-md-2"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-1"></div>
+					<div class="col-md-10 col-md-offset-5">
+					<button type="button" class="btn btn-danger" id="cancel-btn">ปิดหน้าต่าง</button>
+					</div>
+				</div>
+     			  </div>
+   			</div>
+           </div>
+    </div>
+</body>
+</html>
