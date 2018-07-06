@@ -54,6 +54,29 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User checkLoginWithEmail(User user) throws Exception {
+		User result = null;
+		try {
+			result = userDao.checkLoginWithEmail(user);
+			if(result == null){
+				throw new ServiceException(101);
+			}else{
+				List<PrivilegeJson> privileges = userDao.getRightUserByRoleId(result.getRole());
+				if(privileges.isEmpty()){
+					 throw new ServiceException(113);
+				}
+				result.setPrivilegeJsons(privileges);
+				result.setTokenId(app.generateToken());
+				userDao.updateTokenLogin(result);
+			}
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
+	
+	@Override
 	public User checkValidateToken(String tokenId) {
 		User result = null;
 		try {

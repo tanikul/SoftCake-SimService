@@ -1,4 +1,5 @@
 package com.sim.api.service;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import com.sim.api.dao.SimDao;
 import com.sim.api.datatable.DataTable;
 import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.FilterSearch;
+import com.sim.api.model.RequestMst;
 import com.sim.api.model.RequestSim;
 import com.sim.api.model.ResultDataSim;
 import com.sim.api.model.Sim;
@@ -144,11 +146,33 @@ public class SimServiceImpl implements SimService {
 	}
 	
 	@Override
-	public DataTable<RequestSim> SearchRequestSimDataTable(SearchDataTable<RequestSim> searchDataTable) {
-		DataTable<RequestSim> result = new DataTable<>();
+	public DataTable<RequestMst> SearchRequestSimDataTable(SearchDataTable<RequestMst> searchDataTable) {
+		DataTable<RequestMst> result = new DataTable<>();
 		try {
-			List<RequestSim> corps = simDao.SearchSimRequestDataTable(searchDataTable);
-			result.setData(corps);
+			List<RequestMst> corps = simDao.SearchSimRequestDataTable(searchDataTable);
+			String requestId = "";
+			List<RequestMst> requestMsts = new ArrayList<>();
+			List<RequestSim> requestSims = new ArrayList<>();
+			RequestMst requestMst = null;
+			for(RequestMst item : corps) {
+				if("".equals(requestId)) requestId = item.getRequestId();
+				if(!requestId.equals(item.getRequestId())) {
+					requestMst.setRequestSim(requestSims);
+					requestMsts.add(requestMst);
+					requestSims = new ArrayList<>();
+					requestMst = null;
+					requestId = item.getRequestId();
+				}
+				requestMst = item;
+				if(item.getRequestSim().size() > 0) {
+					requestSims.add(item.getRequestSim().get(0));
+				}
+			}
+			if(requestMst != null) {
+				requestMst.setRequestSim(requestSims);
+				requestMsts.add(requestMst);
+			}
+			result.setData(requestMsts);
 			result.setDraw(searchDataTable.getDraw());
 			result.setRecordsTotal(simDao.countRequestSimTotalDataTable(searchDataTable));
 			result.setRecordsFiltered(simDao.CountRequestSimDataTableFilter(searchDataTable));
@@ -160,7 +184,7 @@ public class SimServiceImpl implements SimService {
 	}
 	
 	@Override
-	public void saveRequestSim(RequestSim sim) {
+	public void saveRequestSim(RequestMst sim) {
 		try {
 			simDao.saveRequestSim(sim);
 		} catch(Exception ex){
@@ -170,9 +194,9 @@ public class SimServiceImpl implements SimService {
 	}
 
 	@Override
-	public void cncelRequestSim(RequestSim sim) {
+	public void cncelRequestSim(RequestMst sim) {
 		try {
-			simDao.cncelRequestSim(sim);
+			simDao.cancelRequestSim(sim);
 		}catch(Exception ex){
 			logger.error(ex);
 			throw ex; 
@@ -207,5 +231,15 @@ public class SimServiceImpl implements SimService {
 	@Override
 	public Sim checkDuplicateSimBeforeAddSimNumber(String simNumber) {
 		return simDao.checkDuplicateSimBeforeAddSimNumber(simNumber);
+	}
+
+	@Override
+	public void insertRequestSimData(RequestSim sim) {
+		try {
+			simDao.insertRequestSimData(sim);
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
 	}
 }

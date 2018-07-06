@@ -593,7 +593,7 @@ public class UserDaoImpl implements UserDao {
 		User result = null;
 		StringBuilder sql = new StringBuilder();
 		try {		
-			sql.append("SELECT * FROM ").append(DBConstants.USER).append(" WHERE EMAIL = ?");
+			sql.append("SELECT * FROM ").append(DBConstants.USER).append(" WHERE EMAIL = ? AND ACTIVE_STATUS = 'Y'");
 			result = jdbcTemplate.queryForObject(sql.toString(), new Object[]{ email }, new RowMapper<User>() {
 				 
 					@Override
@@ -686,6 +686,26 @@ public class UserDaoImpl implements UserDao {
 	    	logger.error(e);
     		throw e;
         }
+	}
+	
+	@Override
+	public User checkLoginWithEmail(User user) {
+		User result = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append(" SELECT a.*, b.DESCRIPTION PREFIX_NAME, p.PROVINCE_NAME FROM ");
+			sql.append(DBConstants.USER).append(" a LEFT JOIN ").append(DBConstants.MASTER_SETUP);
+			sql.append(" b ON b.GROUP_TYPE = 'PREFIX' AND a.PREFIX = b.ID ");
+			sql.append(" LEFT JOIN ").append(DBConstants.PROVINCE).append(" p ON a.PROVINCE = p.PROVINCE_ID ");
+			sql.append(" WHERE a.EMAIL = ? AND a.ACTIVE_STATUS = 'Y'");
+			result = (User) jdbcTemplate.queryForObject(sql.toString(),  new Object[] { user.getEmail() }, new UserRowMapper());
+		} catch(EmptyResultDataAccessException e){
+			logger.debug(e);
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
+		return result;
 	}
 	
 }

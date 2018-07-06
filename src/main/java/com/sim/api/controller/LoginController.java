@@ -291,7 +291,19 @@ public class LoginController {
 		 }
         return u;
     }
-    
+	 
+	 @RequestMapping(value = "/checkLoginWithEmail", method = RequestMethod.POST)
+	 public User checkLoginWithEmail(HttpServletRequest request , @RequestBody final User user) throws ServiceException {
+		 User u = null;
+		 try{
+			u = userService.checkLoginWithEmail(user);
+		 }catch(Exception ex){
+			 logger.error(ex);
+			 throw new ServiceException(ex);
+		 }
+        return u;
+    }
+	 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logOut(HttpServletRequest request ,@RequestBody final String userId) throws ServletException {
     	try {	
@@ -331,6 +343,7 @@ public class LoginController {
 			result = userService.checkDuplicateUser(userId);
 		 }catch(Exception ex){
 			 logger.error(ex);
+			 throw new ServiceException(ex);
 		 }
 		 return result;
     }
@@ -343,9 +356,26 @@ public class LoginController {
 			result = userService.selectUserByEmail(email);
 		 }catch(Exception ex){
 			 logger.error(ex);
+			 throw new ServiceException(ex);
 		 }
 		 return (result == null) ? 0 : 1;
-   }
+     }
+    
+     @RequestMapping(value = "/user/getUserAuthenByEmail",method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+	 @ResponseBody
+	 public User getUserByEmail(@RequestBody String email) throws ServiceException {
+		User result = null;
+		try {
+			result = userService.selectUserByEmail(email);
+			if(result == null) {
+				throw new ServiceException(101);
+			}
+		 }catch(Exception ex){
+			 logger.error(ex);
+			 throw new ServiceException(ex);
+		 }
+		 return result;
+    }
     
 	 @RequestMapping(value = "/user/getRightUserDefault",method = RequestMethod.GET, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
 	 @ResponseBody
@@ -356,6 +386,7 @@ public class LoginController {
 			rs.setList(result);
 		}catch(Exception ex){
 			 logger.error(ex);
+			 throw new ServiceException(ex);
 		 }
 		 return rs;
     }
@@ -371,6 +402,7 @@ public class LoginController {
 			userService.updateConfirmation(user);
 		}catch(Exception ex){
 			 logger.error(ex);
+			 throw new ServiceException(ex);
 		}
 		return Constants.SUCCESS;
    }
@@ -382,6 +414,7 @@ public class LoginController {
     		result = userService.updateForgotPassword(email);
 		}catch(Exception ex){
 			 logger.error(ex);
+			 throw new ServiceException(ex);
 		}
 		return result;
     }
@@ -410,6 +443,7 @@ public class LoginController {
     		result = userService.selectUserByEmailAndForgotPassword(user);
 		}catch(Exception ex){
 			logger.error(ex);
+			throw new ServiceException(ex);
 		}
 		return result;
     }

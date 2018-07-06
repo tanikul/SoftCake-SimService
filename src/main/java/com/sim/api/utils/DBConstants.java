@@ -15,6 +15,7 @@ public class DBConstants {
 	public static final String PREDICT = "PREDICT";
 	public static final String BOOKING_DETAIL = "BOOKING_DETAIL";
 	public static final String REQUEST_SIM = "REQUEST_SIM";
+	public static final String REQUEST_MST = "REQUEST_MST";
 	public static final String EMAIL = "EMAIL";
 	
 	private DBConstants() {

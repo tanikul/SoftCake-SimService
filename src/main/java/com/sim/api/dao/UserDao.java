@@ -29,4 +29,5 @@ public interface UserDao {
 	User selectUserByEmailAndForgotPassword(User user);
 	void updatePasswordForgotPassword(User user);
 	void editUserCustomer(User user);
+	User checkLoginWithEmail(User user);
 }

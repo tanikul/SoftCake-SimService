@@ -109,6 +109,10 @@ public class BookingDaoIml implements BookingDao {
 						}
 					});
 					sql = new StringBuilder();
+					sql.append("  SELECT REQUEST_MST_ID FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE SIM_NUMBER = ?");
+					String requestId = (String) jdbcTemplate.queryForObject(sql.toString(), new Object[] { item.getSimNumber() }, String.class);
+					
+					sql = new StringBuilder();
 					sql.append("  DELETE FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE SIM_NUMBER = ?");
 					jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
 						@Override
@@ -116,6 +120,20 @@ public class BookingDaoIml implements BookingDao {
 							ps.setString(1, item.getSimNumber());
 						}
 					});
+					
+					sql = new StringBuilder();
+					sql.append("  SELECT COUNT(0) FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE REQUEST_MST_ID = ?");
+					int cnt = jdbcTemplate.queryForObject(sql.toString(), new Object[] { requestId }, Integer.class);
+					if(cnt == 0) {
+						sql = new StringBuilder();
+						sql.append("  DELETE FROM ").append(DBConstants.REQUEST_MST).append(" WHERE REQUEST_ID = ?");
+						jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+							@Override
+							public void setValues(PreparedStatement ps) throws SQLException {
+								ps.setString(1, requestId);
+							}
+						});
+					}
 					sql = new StringBuilder();
 					sql.append("  INSERT INTO ").append(DBConstants.BOOKING_DETAIL);
 					sql.append("  (BOOKING_DETAIL_ID, BOOKING_ID, SIM_NUMBER, ACTIVATE_FLAG, BOOKING_STATUS, PRICE, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY)");

@@ -25,6 +25,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.sim.api.datatable.Order;
 import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.FilterSearch;
+import com.sim.api.model.RequestMst;
 import com.sim.api.model.RequestSim;
 import com.sim.api.model.Sim;
 import com.sim.api.utils.Constants;
@@ -377,7 +378,7 @@ public class SimDaoImpl implements SimDao {
 		try {
 			StringBuilder sql = new StringBuilder();
 			sql.append(" SELECT SIM_NUMBER, CREDIT_TERM, PRICE, 'S' FLAG_SIM FROM ").append(DBConstants.SIM_MST).append(" WHERE SIM_NUMBER = ? UNION ");
-			sql.append(" SELECT SIM_NUMBER, CREDIT_TERM, PRICE, 'R' FLAG_SIM  FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE SIM_NUMBER = ? AND MERCHANT_ID = ?");
+			sql.append(" SELECT SIM_NUMBER, CREDIT_TERM, PRICE, 'R' FLAG_SIM  FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE SIM_NUMBER = ?");
 			result = jdbcTemplate.query(sql.toString(), new PreparedStatementSetter() {
 	            @Override
 	            public void setValues(PreparedStatement preparedStatement) throws
@@ -385,7 +386,6 @@ public class SimDaoImpl implements SimDao {
 	            	int i = 1;
 	            	preparedStatement.setString(i++, simNumber);
 	            	preparedStatement.setString(i++, simNumber);
-	            	preparedStatement.setString(i++, userId);
 	            }
 	        }, new RowMapper<Sim>() {
 					@Override
@@ -588,19 +588,22 @@ public class SimDaoImpl implements SimDao {
 	}
 	
 	@Override
-	public List<RequestSim> SearchSimRequestDataTable(SearchDataTable<RequestSim> searchDataTable) {
-		List<RequestSim> result = null;
+	public List<RequestMst> SearchSimRequestDataTable(SearchDataTable<RequestMst> searchDataTable) {
+		List<RequestMst> result = null;
 		StringBuilder sql = new StringBuilder();
 		List<String> where = new ArrayList<>();
 		StringBuilder order = new StringBuilder();
 		String[] orderColumns = null;
 		try {
-			orderColumns = new String[]{"a.SIM_NUMBER", "a.PRICE", "a.CREDIT_TERM", "a.REQUEST_STATUS"};
-			sql.append(" SELECT a.SIM_NUMBER, a.PRICE, a.RECIEVED_DATE, a.CREDIT_TERM, a.ACTIVE_STATUS, a.REQUEST_STATUS, a.MERCHANT_ID, a.SUM_NUMBER FROM ");
-			sql.append(DBConstants.REQUEST_SIM).append(" a ");
+			orderColumns = new String[]{"a.REQUEST_ID", "a.REQUEST_DATE", "a.REQUEST_STATUS", "a.MERCHANT_ID"};
+			sql.append(" SELECT a.REQUEST_ID, a.REQUEST_TYPE, a.REQUEST_VALUE, a.REQUEST_DATE, a.REQUEST_STATUS,  a.MERCHANT_ID, a.REJECT_REASON, b.SIM_NUMBER, b.PRICE, b.RECIEVED_DATE, b.CREDIT_TERM, b.REQUEST_STATUS SIM_STATUS, b.SUM_NUMBER, c.DESCRIPTION FROM ");
+			sql.append(DBConstants.REQUEST_MST).append(" a LEFT JOIN ").append(DBConstants.REQUEST_SIM).append(" b ON a.REQUEST_ID = b. REQUEST_MST_ID");
+			sql.append(" LEFT JOIN ").append(DBConstants.MASTER_SETUP).append(" c ON c.GROUP_TYPE = 'REQUEST_TYPE' AND a.REQUEST_TYPE = c.ID ");
 			
-			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getSimNumber())){
-				where.add(" a.SIM_NUMBER = ?");
+			if(searchDataTable.getDataSearch().getRequestSim() != null) {
+				if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber())){
+					where.add(" b.SIM_NUMBER = ?");
+				}
 			}
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
 				where.add(" a.MERCHANT_ID = ?");
@@ -608,16 +611,28 @@ public class SimDaoImpl implements SimDao {
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestStatus())){
 				where.add(" a.REQUEST_STATUS = ?");
 			}
-			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
-				where.add(" a.ACTIVE_STATUS = ?");
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestType())){
+				where.add(" a.REQUEST_TYPE = ?");
 			}
-			
-			if(searchDataTable.getDataSearch().getExceptSimNumber() != null){
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestValue())){
+				where.add(" a.REQUEST_VALUE = ?");
+			}
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
+				where.add(" a.MERCHANT_ID = ?");
+			}
+			/*if(searchDataTable.getDataSearch().getExceptSimNumber() != null){
 				String str = "";
 				for(int i = 0; i < searchDataTable.getDataSearch().getExceptSimNumber().size(); i++) {
 					str += "?,";
 				}
 				where.add(" a.SIM_NUMBER NOT IN (" + str.substring(0, str.length() - 1) + ")");
+			}*/
+			if(searchDataTable.getDataSearch().getRequestSim() != null){
+				String str = "";
+				for(int i = 0; i < searchDataTable.getDataSearch().getRequestSim().get(0).getExceptStatus().size(); i++) {
+					str += "?,";
+				}
+				where.add(" a.REQUEST_STATUS NOT IN (" + str.substring(0, str.length() - 1) + ")");
 			}
 			if(!where.isEmpty()){
 				sql.append(" WHERE ");
@@ -641,8 +656,10 @@ public class SimDaoImpl implements SimDao {
 	            public void setValues(PreparedStatement preparedStatement) throws
 	                    SQLException {
 	            	int i = 1;
-	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getSimNumber())){
-	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getSimNumber());
+	            	if(searchDataTable.getDataSearch().getRequestSim() != null) {
+	    				if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber())){
+	    					preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber());
+	    				}
 	            	}
 	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
 	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getMerchantId());
@@ -650,28 +667,46 @@ public class SimDaoImpl implements SimDao {
 	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestStatus())){
 	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestStatus());
 	            	}
-	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
-	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getActiveStatus());
+	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestType())){
+	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestType());
 	            	}
-	            	if(searchDataTable.getDataSearch().getExceptSimNumber() != null){
-	            		for(String sim : searchDataTable.getDataSearch().getExceptSimNumber()) {
+	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestValue())){
+	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestValue());
+	            	}
+	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
+	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getMerchantId());
+	            	}
+	            	if(searchDataTable.getDataSearch().getRequestSim() != null){
+	            		for(String sim : searchDataTable.getDataSearch().getRequestSim().get(0).getExceptStatus()) {
 	            			preparedStatement.setString(i++, sim);
 	            		}
 	            	}
 	            }
-	        }, new RowMapper<RequestSim>() {
+	        }, new RowMapper<RequestMst>() {
 					@Override
-					public RequestSim mapRow(ResultSet rs, int numRow) throws SQLException {
-						RequestSim sim = new RequestSim();
-						sim.setCreditTerm(rs.getString("CREDIT_TERM"));
-						sim.setActiveStatus(rs.getString("ACTIVE_STATUS"));
-						sim.setPrice(rs.getBigDecimal("PRICE"));
-						sim.setSimNumber(rs.getString("SIM_NUMBER"));
-						sim.setRecievedDate(rs.getDate("RECIEVED_DATE"));
-						sim.setMerchantId(rs.getString("MERCHANT_ID"));
-						sim.setRequestStatus(rs.getString("REQUEST_STATUS"));
-						sim.setSumNumber(rs.getInt("SUM_NUMBER"));
-						return sim;
+					public RequestMst mapRow(ResultSet rs, int numRow) throws SQLException {
+						RequestMst requestMst = new RequestMst();
+						requestMst.setRequestId(rs.getString("REQUEST_ID"));
+						requestMst.setRequestValue(rs.getString("REQUEST_VALUE"));
+						requestMst.setRequestType(rs.getString("REQUEST_TYPE"));
+						requestMst.setRequestStatus(rs.getString("REQUEST_STATUS"));
+						requestMst.setRequestDate(rs.getDate("REQUEST_DATE"));
+						requestMst.setRequestTypeStr(rs.getString("DESCRIPTION"));
+						requestMst.setMerchantId(rs.getString("MERCHANT_ID"));
+						requestMst.setRejectReason(rs.getString("REJECT_REASON"));
+						List<RequestSim> list = new ArrayList<>();
+						if(StringUtils.isNotBlank(rs.getString("SIM_NUMBER"))) {
+							RequestSim sim = new RequestSim();
+							sim.setCreditTerm(rs.getString("CREDIT_TERM"));
+							sim.setPrice(rs.getBigDecimal("PRICE"));
+							sim.setSimNumber(rs.getString("SIM_NUMBER"));
+							sim.setRecievedDate(rs.getDate("RECIEVED_DATE"));
+							sim.setRequestStatus(rs.getString("SIM_STATUS"));
+							sim.setSumNumber(rs.getInt("SUM_NUMBER"));
+							list.add(sim);
+						}
+						requestMst.setRequestSim(list);
+						return requestMst;
 					}
 			    });
 		} catch (Exception e) {
@@ -682,16 +717,18 @@ public class SimDaoImpl implements SimDao {
 	}
 	
 	@Override
-	public int CountRequestSimDataTableFilter(SearchDataTable<RequestSim> searchDataTable) {
-		List<RequestSim> results = null;
+	public int CountRequestSimDataTableFilter(SearchDataTable<RequestMst> searchDataTable) {
+		List<RequestMst> results = null;
 		StringBuilder sql = new StringBuilder();
 		List<String> where = new ArrayList<>();
 		try {
-			sql.append(" SELECT a.SIM_NUMBER, a.PRICE, a.RECIEVED_DATE, a.CREDIT_TERM, a.ACTIVE_STATUS, a.REQUEST_STATUS, a.MERCHANT_ID FROM ");
-			sql.append(DBConstants.REQUEST_SIM).append(" a ");
+			sql.append(" SELECT a.REQUEST_ID, a.REQUEST_TYPE, a.REQUEST_VALUE, a.REQUEST_DATE, a.REQUEST_STATUS, b.SIM_NUMBER, b.PRICE, b.RECIEVED_DATE, b.CREDIT_TERM, b.REQUEST_STATUS SIM_STATUS, b.SUM_NUMBER FROM ");
+			sql.append(DBConstants.REQUEST_MST).append(" a LEFT JOIN ").append(DBConstants.REQUEST_SIM).append(" b ON a.REQUEST_ID = b. REQUEST_MST_ID");
 			
-			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getSimNumber())){
-				where.add(" a.SIM_NUMBER = ?");
+			if(searchDataTable.getDataSearch().getRequestSim() != null) {
+				if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber())){
+					where.add(" b.SIM_NUMBER = ?");
+				}
 			}
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
 				where.add(" a.MERCHANT_ID = ?");
@@ -699,8 +736,18 @@ public class SimDaoImpl implements SimDao {
 			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestStatus())){
 				where.add(" a.REQUEST_STATUS = ?");
 			}
-			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
-				where.add(" a.ACTIVE_STATUS = ?");
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestType())){
+				where.add(" a.REQUEST_TYPE = ?");
+			}
+			if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestValue())){
+				where.add(" a.REQUEST_VALUE = ?");
+			}
+			if(searchDataTable.getDataSearch().getRequestSim() != null){
+				String str = "";
+				for(int i = 0; i < searchDataTable.getDataSearch().getRequestSim().get(0).getExceptStatus().size(); i++) {
+					str += "?,";
+				}
+				where.add(" a.REQUEST_STATUS NOT IN (" + str.substring(0, str.length() - 1) + ")");
 			}
 			if(!where.isEmpty()){
 				sql.append(" WHERE ");
@@ -714,8 +761,10 @@ public class SimDaoImpl implements SimDao {
 	            public void setValues(PreparedStatement preparedStatement) throws
 	                    SQLException {
 	            	int i = 1;
-	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getSimNumber())){
-	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getSimNumber());
+	            	if(searchDataTable.getDataSearch().getRequestSim() != null) {
+	    				if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber())){
+	    					preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestSim().get(0).getSimNumber());
+	    				}
 	            	}
 	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getMerchantId())){
 	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getMerchantId());
@@ -723,16 +772,24 @@ public class SimDaoImpl implements SimDao {
 	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestStatus())){
 	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestStatus());
 	            	}
-	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getActiveStatus())){
-	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getActiveStatus());
+	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestType())){
+	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestType());
+	            	}
+	            	if(StringUtils.isNotBlank(searchDataTable.getDataSearch().getRequestValue())){
+	            		preparedStatement.setString(i++, searchDataTable.getDataSearch().getRequestValue());
+	            	}
+	            	if(searchDataTable.getDataSearch().getRequestSim() != null){
+	            		for(String sim : searchDataTable.getDataSearch().getRequestSim().get(0).getExceptStatus()) {
+	            			preparedStatement.setString(i++, sim);
+	            		}
 	            	}
 	            }
-	        }, new RowMapper<RequestSim>() {
+	        }, new RowMapper<RequestMst>() {
 				 
 					@Override
-					public RequestSim mapRow(ResultSet rs, int numRow) throws SQLException {
-						RequestSim corp = new RequestSim();
-						corp.setSimNumber(rs.getString("SIM_NUMBER"));
+					public RequestMst mapRow(ResultSet rs, int numRow) throws SQLException {
+						RequestMst corp = new RequestMst();
+						corp.setRequestId(rs.getString("REQUEST_ID"));
 						return corp;
 					}
 			 
@@ -745,12 +802,12 @@ public class SimDaoImpl implements SimDao {
 	}
 	
 	@Override
-	public int countRequestSimTotalDataTable(SearchDataTable<RequestSim> searchDataTable) {
+	public int countRequestSimTotalDataTable(SearchDataTable<RequestMst> searchDataTable) {
 		StringBuilder sql = new StringBuilder();
 		int result = 0;
 		try {
 			sql.append("SELECT COUNT(0) FROM ");
-			sql.append(DBConstants.REQUEST_SIM);
+			sql.append(DBConstants.REQUEST_MST);
 			sql.append(" WHERE MERCHANT_ID = ? ");
 			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { 
 					searchDataTable.getDataSearch().getMerchantId() }, Integer.class);
@@ -762,25 +819,27 @@ public class SimDaoImpl implements SimDao {
 	}
 	
 	@Override
-	public void saveRequestSim(RequestSim sim) {
+	public void saveRequestSim(RequestMst sim) {
 		try{
+			String requestId = generateRequestId();
     		StringBuilder sql = new StringBuilder();
-			sql.append("INSERT INTO ").append(DBConstants.REQUEST_SIM).append(" (SIM_NUMBER, REQUEST_STATUS, MERCHANT_ID, SUM_NUMBER, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY) VALUES ");
-			sql.append(" (?, 'W', ?, ?, SYSDATE(), ?, SYSDATE(), ?)");
+			sql.append("INSERT INTO ").append(DBConstants.REQUEST_MST).append(" (REQUEST_ID, REQUEST_TYPE, REQUEST_VALUE, REQUEST_DATE, REQUEST_STATUS, MERCHANT_ID, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY) VALUES ");
+			sql.append(" (?, ?, ?, SYSDATE(), 'W', ?, SYSDATE(), ?, SYSDATE(), ?)");
 			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
 	            @Override
 	            public void setValues(PreparedStatement ps) throws SQLException {
-	            	ps.setString(1, sim.getSimNumber());
-	            	ps.setString(2, sim.getMerchantId());
-	            	ps.setInt(3, sim.getSumNumber());
-	            	ps.setString(4, sim.getCreatedBy());
-	            	ps.setString(5, sim.getLastUpdatedBy());
+	            	ps.setString(1, requestId);
+	            	ps.setString(2, sim.getRequestType());
+	            	ps.setString(3, sim.getRequestValue());
+	            	ps.setString(4, sim.getMerchantId());
+	            	ps.setString(5, sim.getCreatedBy());
+	            	ps.setString(6, sim.getLastUpdatedBy());
 	            }
 	        });
-		}catch (Exception e) {
+	    }catch (Exception e) {
 			logger.error(e);
         	throw e;
-	    }
+        }
 	}
 	
 	@Override
@@ -821,7 +880,7 @@ public class SimDaoImpl implements SimDao {
 	}
 	
 	@Override
-	public void cncelRequestSim(RequestSim sim) {
+	public void cancelRequestBySim(RequestSim sim) {
 		StringBuilder sql = new StringBuilder();
 		try {
 			sql.append("UPDATE ").append(DBConstants.REQUEST_SIM);
@@ -832,6 +891,26 @@ public class SimDaoImpl implements SimDao {
 	            public void setValues(PreparedStatement ps) throws SQLException {
 	            	ps.setString(1, sim.getLastUpdatedBy());
 	            	ps.setString(2, sim.getSimNumber());
+	            }
+	        });
+	    }catch (Exception e) {
+        	logger.error(e);
+        	throw e;
+		}
+	}
+	
+	@Override
+	public void cancelRequestSim(RequestMst sim) {
+		StringBuilder sql = new StringBuilder();
+		try {
+			sql.append("UPDATE ").append(DBConstants.REQUEST_MST);
+			sql.append(" SET REQUEST_STATUS = 'C', LAST_UPDATED_DATE = SYSDATE(), LAST_UPDATED_BY = ?");
+	    	sql.append(" WHERE REQUEST_ID = ? ");
+			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+	            @Override
+	            public void setValues(PreparedStatement ps) throws SQLException {
+	            	ps.setString(1, sim.getLastUpdatedBy());
+	            	ps.setString(2, sim.getRequestId());
 	            }
 	        });
 	    }catch (Exception e) {
@@ -903,5 +982,63 @@ public class SimDaoImpl implements SimDao {
     		throw e;
         }
 		return result;
+	}
+	
+	@Override
+	public String generateRequestId() {
+		StringBuilder sql = new StringBuilder();
+		String result = "";
+		try {
+			sql.append("SELECT CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d'), CAST(a.NUMBER AS INT) + 1) ID FROM (");
+			sql.append(" SELECT CASE WHEN POSITION(CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d')) IN (SELECT REQUEST_ID FROM ").append(DBConstants.REQUEST_MST).append(" ORDER BY REQUEST_ID DESC LIMIT 1)) > 0 "); 
+			sql.append(" THEN REPLACE((SELECT REQUEST_ID FROM ").append(DBConstants.REQUEST_MST).append(" ORDER BY REQUEST_ID DESC LIMIT 1), CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d')), '') ");
+			sql.append(" ELSE 0 END NUMBER) a ");
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[] { }, String.class);
+		} catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
+
+
+	@Override
+	public void insertRequestSimData(RequestSim sim) {
+		StringBuilder sql = new StringBuilder();
+		TransactionDefinition def = new DefaultTransactionDefinition();
+	    TransactionStatus status = transactionManager.getTransaction(def);
+		try{
+			sql.append("  INSERT INTO ").append(DBConstants.REQUEST_SIM); 
+			sql.append("  (SIM_NUMBER, REQUEST_MST_ID, REQUEST_STATUS, AUTHORIZED_DATE, AUTHORIZED_BY, CREDIT_TERM, PRICE, CREATED_DATE, CREATED_BY, LAST_UPDATED_DATE, LAST_UPDATED_BY, SUM_NUMBER)  "); 
+			sql.append("  VALUES ( ?, ?, ?, SYSDATE(), ?, ?, ? , SYSDATE() , ? , SYSDATE(), ?, ? )  ");
+			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+				@Override
+				public void setValues(PreparedStatement ps) throws SQLException {
+					ps.setString(1, sim.getSimNumber());
+					ps.setString(2, sim.getRequestMstId());
+					ps.setString(3, "A");
+					ps.setString(4, sim.getAuthorizedBy());
+					ps.setString(5, sim.getCreditTerm());
+					ps.setBigDecimal(6, sim.getPrice());
+					ps.setString(7, sim.getCreatedBy());
+					ps.setString(8, sim.getLastUpdatedBy());
+					ps.setInt(9, sim.getSumNumber());
+				}
+			});
+			sql = new StringBuilder();
+			sql.append("UPDATE ").append(DBConstants.REQUEST_MST).append(" SET REQUEST_STATUS = 'A', AUTHORIZED_BY = ?, AUTHORIZED_DATE = SYSDATE() WHERE REQUEST_ID = ?");
+			jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+	            @Override
+	            public void setValues(PreparedStatement ps) throws SQLException {
+	            	ps.setString(1, sim.getAuthorizedBy());
+	            	ps.setString(2, sim.getRequestMstId());
+	            }
+	        });
+			transactionManager.commit(status);
+	    }catch (Exception e) {
+        	transactionManager.rollback(status);
+			logger.error(e);
+        	throw e;
+        }
 	}
 }

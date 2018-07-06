@@ -21,6 +21,7 @@ import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.Booking;
 import com.sim.api.model.BookingDetail;
 import com.sim.api.model.Predict;
+import com.sim.api.model.RequestMst;
 import com.sim.api.model.RequestSim;
 import com.sim.api.model.Sim;
 import com.sim.api.model.User;
@@ -95,7 +96,7 @@ public class AdminController {
     			str += "</ul>";
     		}
     		if(listReqDup.size() > 0) {
-    			str = "เบอร์โทรศัพท์ดังต่อไปนี้มีคำขอมาจากลูกค้า <ul>";
+    			str = "เบอร์โทรศัพท์ดังต่อไปนี้มีคำขอมาจากลูกค้าแล้ว <ul>";
     			for(String item : listReqDup) {
     				str += "<li>" + app.parseSimFormat(item) + "</li>";
     			}
@@ -109,6 +110,55 @@ public class AdminController {
 				s.setLastUpdateBy(claims.getSubject());
 				s.setSumNumber(app.calculateSim(s.getSimNumber()));
 				simService.insertSim(s);
+			}
+		} catch(Exception ex){
+			logger.error(ex);
+			throw new ServiceException(ex.getMessage()); 
+		}
+		return Constants.SUCCESS;
+    }
+	 
+	 @RequestMapping(value = "saveSimByRequest",method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+	 @ResponseBody
+	 public String saveSimByRequest(@RequestBody List<RequestSim> list, HttpServletRequest request, HttpServletResponse response) throws ServiceException{
+		Claims claims = (Claims) request.getAttribute(CLAIMSTR);
+    	try {
+    		List<String> listSimDup = new ArrayList<>();
+    		List<String> listReqDup = new ArrayList<>();
+    		for(RequestSim s : list){
+    			Sim sim = simService.checkDuplicateSimBeforeAddSimNumber(s.getSimNumber());
+    			if(sim != null) {
+    				if("S".equals(sim.getFlagSim())) {
+    					listSimDup.add(s.getSimNumber());
+    				}else if("R".equals(sim.getFlagSim())) {
+    					listReqDup.add(s.getSimNumber());
+    				}
+    			}
+    		}
+    		String str = "";
+    		if(listSimDup.size() > 0) {
+    			str = "เบอร์โทรศัพท์ดังต่อไปนี้มีในระบบแล้ว <br/><ul>";
+    			for(String item : listSimDup) {
+    				str += "<li>" + app.parseSimFormat(item) + "</li>";
+    			}
+    			str += "</ul>";
+    		}
+    		if(listReqDup.size() > 0) {
+    			str = "เบอร์โทรศัพท์ดังต่อไปนี้มีคำขอมาจากลูกค้าแล้ว <ul>";
+    			for(String item : listReqDup) {
+    				str += "<li>" + app.parseSimFormat(item) + "</li>";
+    			}
+    			str += "</ul>";
+    		}
+    		if(listReqDup.size() > 0 || listSimDup.size() > 0) {
+    			throw new ServiceException(str);
+    		}
+			for(RequestSim s : list){
+				s.setCreatedBy(claims.getSubject());
+				s.setLastUpdateBy(claims.getSubject());
+				s.setAuthorizedBy(claims.getSubject());
+				s.setSumNumber(app.calculateSim(s.getSimNumber()));
+				simService.insertRequestSimData(s);
 			}
 		} catch(Exception ex){
 			logger.error(ex);
@@ -388,9 +438,9 @@ public class AdminController {
    }
 	
 	@RequestMapping(value = "searchRequestSim", method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
-	public DataTable<RequestSim> searchRequestSim(@RequestBody SearchDataTable<RequestSim> searchDataTable,
+	public DataTable<RequestMst> searchRequestSim(@RequestBody SearchDataTable<RequestMst> searchDataTable,
 			final HttpServletRequest request) throws ServiceException {
-		DataTable<RequestSim> result = new DataTable<>();
+		DataTable<RequestMst> result = new DataTable<>();
 		try{
 			result = simService.SearchRequestSimDataTable(searchDataTable);
 		} catch (Exception e) {

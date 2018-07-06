@@ -17,6 +17,7 @@ import com.sim.api.datatable.DataTable;
 import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.Booking;
 import com.sim.api.model.BookingDetail;
+import com.sim.api.model.RequestMst;
 import com.sim.api.model.RequestSim;
 import com.sim.api.model.Sim;
 import com.sim.api.service.BookingService;
@@ -162,9 +163,9 @@ public class AuthController {
     }
 	 
 	@RequestMapping(value = "searchRequestSim", method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
-	public DataTable<RequestSim> searchRequestSim(@RequestBody SearchDataTable<RequestSim> searchDataTable,
+	public DataTable<RequestMst> searchRequestSim(@RequestBody SearchDataTable<RequestMst> searchDataTable,
 			final HttpServletRequest request) throws ServiceException {
-		DataTable<RequestSim> result = new DataTable<>();
+		DataTable<RequestMst> result = new DataTable<>();
 		try{
 			Claims claims = (Claims) request.getAttribute(CLAIMSTR);
 			searchDataTable.getDataSearch().setMerchantId(claims.getSubject());
@@ -178,14 +179,13 @@ public class AuthController {
 	
 	@RequestMapping(value = "saveRequestSim", method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
 	 @ResponseBody
-	 public String saveRequestSim(@RequestBody RequestSim sim,
+	 public String saveRequestSim(@RequestBody RequestMst sim,
 			 HttpServletRequest request, HttpServletResponse response) throws ServiceException{
 		Claims claims = (Claims) request.getAttribute(CLAIMSTR);
 		try {
 			sim.setCreatedBy(claims.getSubject());
 			sim.setLastUpdateBy(claims.getSubject());
 			sim.setMerchantId(claims.getSubject());
-			sim.setSumNumber(app.calculateSim(sim.getSimNumber()));
 			simService.saveRequestSim(sim);
 		} catch(Exception ex){
 			logger.error(ex);
@@ -211,7 +211,7 @@ public class AuthController {
 	
 	@RequestMapping(value = "cancelRequestSim", method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
 	 @ResponseBody
-	 public String cancelRequestSim(@RequestBody RequestSim sim,
+	 public String cancelRequestSim(@RequestBody RequestMst sim,
 			 HttpServletRequest request, HttpServletResponse response) throws ServiceException{
 		Claims claims = (Claims) request.getAttribute(CLAIMSTR);
 		try {

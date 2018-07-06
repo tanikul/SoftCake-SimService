@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sim.api.datatable.SearchDataTable;
 import com.sim.api.model.FilterSearch;
+import com.sim.api.model.RequestMst;
 import com.sim.api.model.RequestSim;
 import com.sim.api.model.Sim;
 
@@ -24,14 +25,17 @@ public interface SimDao {
 	void deleteSimTmpAndMst(Sim sim);
 	void copyToSimMst(Sim sim);
 	void copyToSimTmpDelete(Sim sim);
-	List<RequestSim> SearchSimRequestDataTable(SearchDataTable<RequestSim> searchDataTable);
-	int CountRequestSimDataTableFilter(SearchDataTable<RequestSim> searchDataTable);
-	int countRequestSimTotalDataTable(SearchDataTable<RequestSim> searchDataTable);
-	void saveRequestSim(RequestSim sim);
-	void cncelRequestSim(RequestSim sim);
+	List<RequestMst> SearchSimRequestDataTable(SearchDataTable<RequestMst> searchDataTable);
+	int CountRequestSimDataTableFilter(SearchDataTable<RequestMst> searchDataTable);
+	int countRequestSimTotalDataTable(SearchDataTable<RequestMst> searchDataTable);
+	void saveRequestSim(RequestMst sim);
+	void cancelRequestSim(RequestMst sim);
 	void updateRequestSim(RequestSim sim);
 	void deleteRequestSim(RequestSim sim);
 	int checkSimNumberBeforeRequest(String sim);
 	int checkDuplicateSimNumber(String sim);
 	Sim checkDuplicateSimBeforeAddSimNumber(String simNumber);
+	String generateRequestId();
+	void insertRequestSimData(RequestSim sim);
+	void cancelRequestBySim(RequestSim sim);
 }
