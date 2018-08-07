@@ -989,7 +989,7 @@ public class SimDaoImpl implements SimDao {
 		StringBuilder sql = new StringBuilder();
 		String result = "";
 		try {
-			sql.append("SELECT CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d'), CAST(a.NUMBER AS INT) + 1) ID FROM (");
+			sql.append("SELECT CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d'), a.NUMBER + 1) ID FROM (");
 			sql.append(" SELECT CASE WHEN POSITION(CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d')) IN (SELECT REQUEST_ID FROM ").append(DBConstants.REQUEST_MST).append(" ORDER BY REQUEST_ID DESC LIMIT 1)) > 0 "); 
 			sql.append(" THEN REPLACE((SELECT REQUEST_ID FROM ").append(DBConstants.REQUEST_MST).append(" ORDER BY REQUEST_ID DESC LIMIT 1), CONCAT('RE', DATE_FORMAT(SYSDATE(),'%Y%m%d')), '') ");
 			sql.append(" ELSE 0 END NUMBER) a ");

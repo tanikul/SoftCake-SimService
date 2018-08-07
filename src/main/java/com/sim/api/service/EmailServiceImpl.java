@@ -159,7 +159,7 @@ public class EmailServiceImpl implements EmailService {
 			 
 			SimplePdfExporterConfiguration exportConfig
 			  = new SimplePdfExporterConfiguration();
-			exportConfig.setMetadataAuthor("baeldung");
+			exportConfig.setMetadataAuthor("vipsim.co");
 			exportConfig.setEncrypted(true);
 			exportConfig.setAllowedPermissionsHint("PRINTING");
 			 

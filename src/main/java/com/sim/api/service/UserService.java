@@ -28,4 +28,5 @@ public interface UserService {
 	void updatePasswordForgotPassword(User user) throws Exception;
 	void editUserCustomer(User user);
 	User checkLoginWithEmail(User user) throws Exception;
+	int checkEmailInSystem(String email);
 }

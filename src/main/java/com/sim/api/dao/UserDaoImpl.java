@@ -59,7 +59,7 @@ public class UserDaoImpl implements UserDao {
 				sql.append("SELECT a.USER_ID, a.FIRST_NAME, a.LAST_NAME, a.ACTIVE_STATUS, a.EMAIL, 0 CNT_BOOKING, 0 CNT_REQUEST, p.DESCRIPTION PREFIX_NAME, r.ROLE_NAME, r.ROLE_ID ");
 			}else {
 				orderColumns = new String[]{"a.LAST_UPDATED_DATE", "a.USER_ID", "a.FIRST_NAME", "a.LAST_NAME", "a.EMAIL" };
-				sql.append("SELECT (SELECT COUNT(0) FROM ").append(DBConstants.BOOKING).append(" WHERE a.USER_ID = MERCHANT_ID) CNT_BOOKING, (SELECT COUNT(0) FROM ").append(DBConstants.REQUEST_SIM).append(" WHERE a.USER_ID = MERCHANT_ID) CNT_REQUEST, a.USER_ID, a.FIRST_NAME, a.LAST_NAME, a.EMAIL, a.ACTIVE_STATUS, p.DESCRIPTION PREFIX_NAME, NULL ROLE_NAME, 0 ROLE_ID ");
+				sql.append("SELECT (SELECT COUNT(0) FROM ").append(DBConstants.BOOKING).append(" WHERE a.USER_ID = MERCHANT_ID) CNT_BOOKING, (SELECT COUNT(0) FROM ").append(DBConstants.REQUEST_MST).append(" WHERE a.USER_ID = MERCHANT_ID) CNT_REQUEST, a.USER_ID, a.FIRST_NAME, a.LAST_NAME, a.EMAIL, a.ACTIVE_STATUS, p.DESCRIPTION PREFIX_NAME, NULL ROLE_NAME, 0 ROLE_ID ");
 			}
 			sql.append(" FROM ");
 			sql.append(DBConstants.USER).append(" a ");
@@ -707,5 +707,44 @@ public class UserDaoImpl implements UserDao {
         }
 		return result;
 	}
+	
+	@Override
+	public int checkEmailInSystem(String email) {
+		int result = 0;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append(" SELECT COUNT(0) FROM ");
+			sql.append(DBConstants.USER).append(" WHERE EMAIL = ? ");
+			result = jdbcTemplate.queryForObject(sql.toString(), new Object[]{ email }, Integer.class);
+		} catch (Exception e) {
+    		logger.error(e);
+    		throw e;
+        }
+		return result;
+	}
+	
+	/*@Override
+	public void createUserWithEmailFB(User user) {
+		try{	
+	        StringBuilder sql = new StringBuilder();
+	    	sql.append("INSERT INTO ").append(DBConstants.USER).append("(");
+	    	sql.append(DBConstants.USER);
+	    	sql.append(" SET ");
+	    	sql.append(" ACTIVE_STATUS = ?, ");
+	    	sql.append(" LAST_UPDATED_DATE = SYSDATE() , LAST_UPDATED_BY = ? WHERE USER_ID = ? ");
+	    	jdbcTemplate.update(sql.toString(), new PreparedStatementSetter() {
+	    		@Override
+	    		public void setValues(PreparedStatement ps) throws SQLException {
+	    			ps.setString(1, user.getActiveStatus());
+	    			ps.setString(2, user.getLastUpdatedBy());  
+	    			ps.setString(3, user.getUserId());  			
+	    		}
+	    	});
+	    }catch (Exception e) {
+	    	logger.error(e);
+    		throw e;
+        }
+	}*/
+	
 	
 }

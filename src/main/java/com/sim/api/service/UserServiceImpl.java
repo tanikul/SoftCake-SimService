@@ -255,4 +255,16 @@ public class UserServiceImpl implements UserService {
 		userDao.editUserCustomer(user);
 	}
 
+	@Override
+	public int checkEmailInSystem(String email) {
+		int result = 0;
+		try {
+			result = userDao.checkEmailInSystem(email);
+		}catch(Exception ex){
+			logger.error(ex);
+			throw ex;
+		}
+		return result;
+	}
+
 }

@@ -1,12 +1,8 @@
 package com.sim.api.controller;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
-import org.castor.core.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,14 +23,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.zxing.common.StringUtils;
 import com.sim.api.common.ServiceException;
 import com.sim.api.model.Booking;
 import com.sim.api.model.BookingDetail;
 import com.sim.api.model.ListPrivileges;
 import com.sim.api.model.PrivilegeJson;
-import com.sim.api.model.Sim;
 import com.sim.api.model.User;
 import com.sim.api.service.BookingService;
 import com.sim.api.service.EmailService;
@@ -80,7 +72,6 @@ public class LoginController {
 	 @RequestMapping(value = "/testEmail",method = RequestMethod.GET)
 	 public String testEmail() throws ServiceException {
 		try {
-			Booking b = new Booking();
 			emailService.sendEmailSubmitBooking("201805042");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -279,6 +270,23 @@ public class LoginController {
 		 return "^_^  Welcome to MasterSetup Service !!!!!!!!!!!!! \n";
 	 }
 	 
+	 @RequestMapping(value = "/test1",method = RequestMethod.GET)
+	 public String test1() throws ServiceException {
+		 return "^_^  Welcome to MasterSetup Service !!!!!!!!!!!!! \n";
+	 }
+	 
+	 @RequestMapping(value = "/TestPost", method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+		@ResponseBody
+		public String TestPost(HttpServletRequest request,
+				 HttpServletResponse response) throws Exception {
+			try {	
+			} catch(Exception ex){
+				logger.error(ex);
+				throw new Exception(ex); 
+			}
+	      return Constants.SUCCESS;
+	  }
+	 
 	 @RequestMapping(value = "/login", method = RequestMethod.POST)
 	 public User login(HttpServletRequest request , @RequestBody final User user) throws ServiceException {
 		 User u = null;
@@ -347,6 +355,19 @@ public class LoginController {
 		 }
 		 return result;
     }
+    
+    @RequestMapping(value = "/user/checkEmailInSystem",method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
+	 @ResponseBody
+	 public int checkEmailInSystem(@RequestBody String email) throws ServiceException {
+		int result = 0;
+		try {
+			result = userService.checkEmailInSystem(email);
+		 }catch(Exception ex){
+			 logger.error(ex);
+			 throw new ServiceException(ex);
+		 }
+		 return result;
+   }
     
     @RequestMapping(value = "/user/checkDuplicateEmail",method = RequestMethod.POST, produces="application/json;charset=UTF-8",headers = {"Accept=text/xml, application/json"})
 	 @ResponseBody

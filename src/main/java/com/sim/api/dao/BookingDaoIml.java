@@ -200,7 +200,7 @@ public class BookingDaoIml implements BookingDao {
 		StringBuilder sql = new StringBuilder();
 		String result = "";
 		try {
-			sql.append("SELECT CONCAT(DATE_FORMAT(SYSDATE(),'%Y%m%d'), CAST(a.NUMBER AS INT) + 1) ID FROM (");
+			sql.append("SELECT CONCAT(DATE_FORMAT(SYSDATE(),'%Y%m%d'), a.NUMBER + 1) ID FROM (");
 			sql.append(" SELECT CASE WHEN POSITION(DATE_FORMAT(SYSDATE(),'%Y%m%d') IN (SELECT BOOKING_ID FROM ").append(DBConstants.BOOKING).append(" ORDER BY BOOKING_ID DESC LIMIT 1)) > 0 "); 
 			sql.append(" THEN REPLACE((SELECT BOOKING_ID FROM ").append(DBConstants.BOOKING).append(" ORDER BY BOOKING_ID DESC LIMIT 1), DATE_FORMAT(SYSDATE(),'%Y%m%d'), '') ");
 			sql.append(" ELSE 0 END NUMBER) a ");
@@ -217,7 +217,7 @@ public class BookingDaoIml implements BookingDao {
 		StringBuilder sql = new StringBuilder();
 		String result = "";
 		try {
-			sql.append("SELECT CONCAT(DATE_FORMAT(SYSDATE(),'%Y%m%d'), CAST(a.NUMBER AS INT) + 1) ID FROM (");
+			sql.append("SELECT CONCAT(DATE_FORMAT(SYSDATE(),'%Y%m%d'), a.NUMBER + 1) ID FROM (");
 			sql.append(" SELECT CASE WHEN POSITION(DATE_FORMAT(SYSDATE(),'%Y%m%d') IN (SELECT BOOKING_DETAIL_ID FROM ").append(DBConstants.BOOKING_DETAIL).append(" ORDER BY BOOKING_DETAIL_ID DESC LIMIT 1)) > 0 "); 
 			sql.append(" THEN REPLACE((SELECT BOOKING_DETAIL_ID FROM ").append(DBConstants.BOOKING_DETAIL).append(" ORDER BY BOOKING_DETAIL_ID DESC LIMIT 1), DATE_FORMAT(SYSDATE(),'%Y%m%d'), '') ");
 			sql.append(" ELSE 0 END NUMBER) a ");

@@ -30,4 +30,5 @@ public interface UserDao {
 	void updatePasswordForgotPassword(User user);
 	void editUserCustomer(User user);
 	User checkLoginWithEmail(User user);
+	int checkEmailInSystem(String email);
 }
